@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public interface RepositoryPiletas extends JpaRepository<Piletas,Long> {
     Piletas findById(long id);
-    ArrayList<Piletas> findByModelo(Piletas modelo);
+    ArrayList<Piletas> findByModelo(String modelo);
     ArrayList<Piletas> findByMarca(String marca);
     ArrayList<Piletas> findByModeloAndMarca(String modelo, String marca);
 }
