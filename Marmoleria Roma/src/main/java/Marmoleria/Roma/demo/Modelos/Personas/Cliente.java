@@ -9,6 +9,11 @@ import jakarta.validation.constraints.Size;
 @Entity
 public class Cliente extends Persona {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_Cliente")
+    @SequenceGenerator(name = "id_Cliente", sequenceName = "id_Cliente", allocationSize = 1)
+    protected long id_Cliente;
+
     @NotBlank(message="El Cliente debe poseer un apellido...")
     protected String Apellido;
 
