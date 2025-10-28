@@ -15,11 +15,13 @@ public class ServiceUsuario {
     @Autowired
     private RepositoryUsuario repoUsuario;
 
-    public void guardarUsuario(Usuario usuario) { repoUsuario.save(usuario); }
+    public void guardarUsuario(Usuario usuario) {
+        repoUsuario.save(usuario);
+    }
 
     public Optional<List<Usuario>> BuscarPorTipoDeUsuario(TipoUsuario tipo) {return Optional.of(repoUsuario.findByTipoUsuario(tipo)); }
 
-    public Usuario BuscarPorId(Long id) { return repoUsuario.findById(id).orElseThrow(()-> new IdNoEncontrado("Este ID no existe")); }
+    public Optional<Usuario> BuscarPorId(long id) { return Optional.of(repoUsuario.findById(id)); }
 
     public Usuario BuscarPorEmail(String email) { return repoUsuario.findByEmail(email); }
 
