@@ -11,7 +11,7 @@ public class Piletas {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_pileta")
     @SequenceGenerator(name = "id_pileta", sequenceName = "id_pileta", allocationSize = 1)
-    private Long Id;
+    private long Id;
 
     @NotBlank(message = "La pileta debe poseer una marca...")
     private String Marca;
@@ -26,6 +26,9 @@ public class Piletas {
 
     @DecimalMin(value = "1.0", message = "EL ancho no puede ser cero o negativo")
     private Float Ancho;
+
+    @DecimalMin(value = "0.0", message = "El valor no puede ser negativo")
+    private int Cantidad;
 
     public Piletas() {}
 
@@ -67,5 +70,14 @@ public class Piletas {
 
     public void setAncho( @DecimalMin(value = "1.0", message = "EL ancho no puede ser cero o negativo") Float ancho) {
         Ancho = ancho;
+    }
+
+    @DecimalMin(value = "0.0", message = "El valor no puede ser negativo")
+    public int getCantidad() {
+        return Cantidad;
+    }
+
+    public void setCantidad(@DecimalMin(value = "0.0", message = "El valor no puede ser negativo") int cantidad) {
+        Cantidad = cantidad;
     }
 }

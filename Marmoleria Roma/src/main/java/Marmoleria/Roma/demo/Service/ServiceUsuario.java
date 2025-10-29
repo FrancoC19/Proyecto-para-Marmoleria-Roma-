@@ -21,9 +21,11 @@ public class ServiceUsuario {
 
     public Optional<List<Usuario>> BuscarPorTipoDeUsuario(TipoUsuario tipo) {return Optional.of(repoUsuario.findByTipoUsuario(tipo)); }
 
-    public Optional<Usuario> BuscarPorId(long id) { return Optional.of(repoUsuario.findById(id)); }
+    public Usuario buscarPorId(long id) { return repoUsuario.findById(id); }
 
     public Usuario BuscarPorEmail(String email) { return repoUsuario.findByEmail(email); }
 
     public Optional<List<Usuario>> todosLosUsuarios(){return Optional.of(repoUsuario.findAll());}
+
+    public void eliminarUsuario(Usuario usuario) {repoUsuario.delete(usuario);}
 }

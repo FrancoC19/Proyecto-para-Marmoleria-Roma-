@@ -1,4 +1,4 @@
-package Controller;
+package Marmoleria.Roma.demo.Controller;
 
 import Marmoleria.Roma.demo.Excepciones.ClienteNoEncontrado;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
@@ -37,8 +37,8 @@ public class ControllerCliente {
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/{dni}")
-    public Cliente cargarClientexDNI(@PathVariable long dni) {
+    @GetMapping("/Buscar/{dni}")
+    public Cliente buscarClientexDNI(@PathVariable long dni) {
         Cliente existente = serviceCliente.buscarClientePorDNI(dni);
 
         if (existente == null) {

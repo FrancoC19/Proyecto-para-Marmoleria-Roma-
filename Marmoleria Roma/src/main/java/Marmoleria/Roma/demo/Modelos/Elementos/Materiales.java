@@ -11,7 +11,7 @@ public class Materiales {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_material")
     @SequenceGenerator(name = "id_material", sequenceName = "id_material", allocationSize = 1)
-    private long id;
+    private long id_Material;
 
     @NotBlank(message = "El material debe poseer un nombre...")
     private String nombreMaterial;

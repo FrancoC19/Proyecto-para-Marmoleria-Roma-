@@ -20,9 +20,17 @@ public class ServiceMateriales {
 
     public Optional<List<Materiales>> buscarPorTipoDeMaterial(TipoMaterial tipo){return Optional.of(repositoryMatriales.findByTipoMaterial(tipo));}
 
-    public Optional<List<Materiales>> buscraPorValorMetroCuadrado(float valor){return Optional.of(repositoryMatriales.findByValorMetroCuadrado(valor));}
+    public List<Materiales> buscarPorValorMetroCuadrado(float valor){
+        return repositoryMatriales.findAll().stream().filter(v -> {
+            if (v.getValorMetroCuadrado()<=valor){
+                return true;
+            }
+            return false;
+        }).toList();
+    }
 
-    public Materiales BuscarPorNombre(String Nombre){return repositoryMatriales.findByNombreMaterial(Nombre);}
+    public Materiales buscarPorNombre(String Nombre){return repositoryMatriales.findByNombreMaterial(Nombre);}
 
     public void guardarMaterial(Materiales material){repositoryMatriales.save(material);}
+    public void eliminarMaterial(Materiales material){repositoryMatriales.delete(material);}
 }
