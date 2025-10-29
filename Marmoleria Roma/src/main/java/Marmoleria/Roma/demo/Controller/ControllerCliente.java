@@ -1,4 +1,4 @@
-package Controller;
+package Marmoleria.Roma.demo.Controller;
 
 import Marmoleria.Roma.demo.Excepciones.ClienteNoEncontrado;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
