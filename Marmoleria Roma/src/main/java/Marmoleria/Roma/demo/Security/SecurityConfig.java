@@ -31,7 +31,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // ⚠️ En producción activarlo
                 .authorizeHttpRequests(auth -> auth
-                        // No hay endpoints públicos, todo requiere autenticación
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers(
+                                "/auth/login",
+                                "/auth/verificarToken"
+                        ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")  // Solo administradores
                         .requestMatchers("/user/**").hasAnyRole("USUARIO", "ADMINISTRADOR")  // Usuario o admin
                         .anyRequest().authenticated()  // Todo lo demás autenticado
