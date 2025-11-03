@@ -37,7 +37,7 @@ public class ControllerCliente {
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/{dni}")
+    @GetMapping("/buscar/{dni}")
     public Cliente cargarClientexDNI(@PathVariable long dni) {
         Cliente existente = serviceCliente.buscarClientePorDNI(dni);
 
