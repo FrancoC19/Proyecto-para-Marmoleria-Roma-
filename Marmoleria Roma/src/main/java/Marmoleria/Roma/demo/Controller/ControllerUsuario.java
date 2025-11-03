@@ -48,7 +48,7 @@ public class ControllerUsuario {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
     @GetMapping("/Email/{email}")
     public Usuario buscarPorEmail(@PathVariable String email){
-        return serviceUsuario.BuscarPorEmail(email);
+        return serviceUsuario.BuscarPorEmail(email).orElseThrow(() -> new UsuarioNoEncontrado("No se encontro el usuario relacionado a este Email"));
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
@@ -65,12 +65,12 @@ public class ControllerUsuario {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PutMapping("/Modificar")
     public ResponseEntity<String> modificarUsuario(@RequestBody Usuario DatosActualizados,@PathVariable long id){
-       return Optional.ofNullable(serviceUsuario.buscarPorId(id))
-               .map(usuario->{
-                   DatosActualizados.setEmail(usuario.getEmail());
-                   DatosActualizados.setContra(usuario.getContra());
-                   return ResponseEntity.ok("Usuario modificado correctamente");
-               }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontro el usuario"));
+        return Optional.ofNullable(serviceUsuario.buscarPorId(id))
+                .map(usuario->{
+                    DatosActualizados.setEmail(usuario.getEmail());
+                    DatosActualizados.setContra(usuario.getContra());
+                    return ResponseEntity.ok("Usuario modificado correctamente");
+                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontro el usuario"));
 
     }
 
