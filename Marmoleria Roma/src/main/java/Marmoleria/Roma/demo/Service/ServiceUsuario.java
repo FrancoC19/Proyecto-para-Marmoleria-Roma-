@@ -23,7 +23,7 @@ public class ServiceUsuario {
 
     public Usuario buscarPorId(long id) { return repoUsuario.findById(id); }
 
-    public Usuario BuscarPorEmail(String email) { return repoUsuario.findByEmail(email); }
+    public Optional<Usuario> BuscarPorEmail(String email) { return repoUsuario.findByEmail(email); }
 
     public Optional<List<Usuario>> todosLosUsuarios(){return Optional.of(repoUsuario.findAll());}
 

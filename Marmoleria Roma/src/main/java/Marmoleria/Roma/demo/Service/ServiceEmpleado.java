@@ -23,4 +23,6 @@ public class ServiceEmpleado {
 
     public Empleado buscarPorCorreo (String correo) { return repoEmpleado.findByCorreo(correo); }
 
+    public void EliminarEmpleado(long DNI) {  repoEmpleado.deleteById(DNI); }
+
 }
