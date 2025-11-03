@@ -41,6 +41,7 @@ public class Usuario implements UserDetails {
         this.tipoUsuario = tipoUsuario;
         this.email = Email;
         this.contra = contra;
+        encriptarPassword();
     }
 
     /*---------------------------------elementos de JWT----------------------------------------------*/

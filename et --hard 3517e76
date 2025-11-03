@@ -1,0 +1,16 @@
+[33m1d38108[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrama-nahuel[m[33m)[m HEAD@{0}: commit (merge): Merge remote-tracking branch 'origin/rama-nahuel' into rama-nahuel
+[33m3517e76[m HEAD@{1}: reset: moving to HEAD
+[33m3517e76[m HEAD@{2}: commit: Direcciones semiterminada
+[33mdc8876b[m HEAD@{3}: reset: moving to dc8876b
+[33m82345de[m HEAD@{4}: commit (merge): Controlers: Piletas- Usuarios-Materiales
+[33mdc8876b[m HEAD@{5}: commit: Controlers: Piletas- Usuarios-Materiales
+[33mb72890e[m HEAD@{6}: checkout: moving from main to rama-nahuel
+[33maf94e29[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{7}: checkout: moving from Branch-Franco to main
+[33mb6efc9d[m[33m ([m[1;31morigin/Branch-Franco[m[33m, [m[1;32mBranch-Franco[m[33m)[m HEAD@{8}: commit: Cree pedidos y agregue el repository
+[33maf94e29[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{9}: checkout: moving from main to Branch-Franco
+[33maf94e29[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{10}: commit: agregue todos los services
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{11}: checkout: moving from features/cliente to main
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{12}: checkout: moving from main to features/cliente
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{13}: checkout: moving from main to main
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{14}: Branch: renamed refs/heads/master to refs/heads/main
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{16}: commit (initial): Primer Commit

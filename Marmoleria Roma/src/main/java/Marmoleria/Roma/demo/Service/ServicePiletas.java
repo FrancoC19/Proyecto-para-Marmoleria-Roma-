@@ -15,7 +15,7 @@ public class ServicePiletas {
 
     public void guardarPileta(Piletas pileta){ repoPiletas.save(pileta);}
 
-    public Piletas buscarPorId(int id){ return repoPiletas.findById(id);}
+    public Piletas buscarPorId(long id){ return repoPiletas.findById(id);}
 
     public Optional<List<Piletas>> buscarPorModelo(String modelo){ return Optional.of(repoPiletas.findByModelo(modelo));}
 
@@ -24,5 +24,7 @@ public class ServicePiletas {
     public Optional<List<Piletas>> buscarModeloYMarca (String marca,String modelo){return Optional.of(repoPiletas.findByModeloAndMarca( modelo,marca));}
 
     public Optional<List<Piletas>> todasLasPiletas (){ return Optional.of(repoPiletas.findAll());}
+
+    public void eliminarPileta (Piletas pileta){repoPiletas.delete(pileta);}
 
 }

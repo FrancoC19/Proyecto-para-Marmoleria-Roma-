@@ -1,10 +1,15 @@
 package Marmoleria.Roma.demo.Modelos.Personas;
 
+import Marmoleria.Roma.demo.Excepciones.DireccionInvalida;
+import Marmoleria.Roma.demo.Modelos.Extras.Direccion;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Cliente extends Persona {
@@ -15,12 +20,15 @@ public class Cliente extends Persona {
     protected long id_Cliente;
 
     @NotBlank(message="El Cliente debe poseer un apellido...")
-    protected String Apellido;
+    private String Apellido;
 
     @NotNull(message = "El cliente debe tener un telefono...")
     @Size(min=10,max = 10, message = "El numero debe contac con 10 caracteres, 3 del area y 7 identificativo")
     @Pattern(regexp = "\\d{10}", message = "El teléfono solo puede contener números")
-    protected String telefono;
+    private String telefono;
+
+    @OneToMany(mappedBy = "Direccion", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Direccion> direcciones;
 
     public Cliente(){}
 
@@ -28,6 +36,7 @@ public class Cliente extends Persona {
         super(DNI, correo, nombre);
         this.Apellido = apellido;
         this.telefono = telefono;
+        this.direcciones = new ArrayList<>();
     }
 
     public @NotBlank(message = "El Cliente debe poseer un apellido...") String getApellido() {
@@ -44,5 +53,14 @@ public class Cliente extends Persona {
 
     public void setTelefono(@NotNull(message = "El cliente debe tener un telefono...") @Size(min = 10, max = 10, message = "El numero debe contac con 10 caracteres, 3 del area y 7 identificativo") @Pattern(regexp = "\\d{10}", message = "El teléfono solo puede contener números") String telefono) {
         this.telefono = telefono;
+    }
+
+    public void AgregarDireccion(Direccion direccion){
+        if(direccion == null){
+            throw new DireccionInvalida("La direccion no existe");
+        }
+        else{
+            direcciones.add(direccion);
+        }
     }
 }

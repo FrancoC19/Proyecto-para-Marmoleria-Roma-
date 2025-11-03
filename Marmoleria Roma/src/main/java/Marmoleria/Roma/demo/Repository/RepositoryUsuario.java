@@ -4,9 +4,10 @@ import Marmoleria.Roma.demo.Modelos.Personas.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public interface RepositoryUsuario extends JpaRepository<Usuario,Long> {
     Usuario findById(long id);
     ArrayList<Usuario> findByTipoUsuario(TipoUsuario tipoUsuario);
-    Usuario findByEmail(String email);
+    Optional<Usuario> findByEmail(String email);
 }

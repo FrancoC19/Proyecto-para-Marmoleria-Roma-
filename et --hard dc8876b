@@ -1,0 +1,12 @@
+[33m82345de[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrama-nahuel[m[33m)[m HEAD@{0}: commit (merge): Controlers: Piletas- Usuarios-Materiales
+[33mdc8876b[m HEAD@{1}: commit: Controlers: Piletas- Usuarios-Materiales
+[33mb72890e[m HEAD@{2}: checkout: moving from main to rama-nahuel
+[33maf94e29[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{3}: checkout: moving from Branch-Franco to main
+[33mb6efc9d[m[33m ([m[1;31morigin/Branch-Franco[m[33m, [m[1;32mBranch-Franco[m[33m)[m HEAD@{4}: commit: Cree pedidos y agregue el repository
+[33maf94e29[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{5}: checkout: moving from main to Branch-Franco
+[33maf94e29[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{6}: commit: agregue todos los services
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{7}: checkout: moving from features/cliente to main
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{8}: checkout: moving from main to features/cliente
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{9}: checkout: moving from main to main
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{10}: Branch: renamed refs/heads/master to refs/heads/main
+[33m99d0018[m[33m ([m[1;31morigin/features/cliente[m[33m, [m[1;32mfeatures/cliente[m[33m)[m HEAD@{12}: commit (initial): Primer Commit
