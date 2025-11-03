@@ -1,8 +1,16 @@
 package Marmoleria.Roma.demo.Modelos.Extras;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 
+@Entity
 public class Direccion {
+
+    @Id
+    @GeneratedValue
+    private long id;
 
     @NotBlank(message="La direccion debe poseer una calle...")
     private String Calle;
