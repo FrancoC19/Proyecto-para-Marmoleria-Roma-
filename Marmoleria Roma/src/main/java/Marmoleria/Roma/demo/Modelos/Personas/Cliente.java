@@ -27,7 +27,8 @@ public class Cliente extends Persona {
     @Pattern(regexp = "\\d{10}", message = "El teléfono solo puede contener números")
     private String telefono;
 
-    @OneToMany(mappedBy = "Direccion", cascade = CascadeType.ALL,orphanRemoval = true)
+    @ElementCollection
+    @CollectionTable(name = "cliente_direcciones", joinColumns = @JoinColumn(name = "cliente_id"))
     private List<Direccion> direcciones;
 
     public Cliente(){}
@@ -55,16 +56,37 @@ public class Cliente extends Persona {
         this.telefono = telefono;
     }
 
-    public void AgregarDireccion(Direccion direccion){
-        if(direccion == null){
-            throw new DireccionInvalida("La direccion no existe");
-        }
-        else{
-            direcciones.add(direccion);
-        }
-    }
-
     public List<Direccion> getDirecciones() {
         return direcciones;
+    }
+
+    public void agregarDireccion(Direccion direccion) {
+        if (direccion == null) {
+            throw new DireccionInvalida("La dirección no puede ser nula");
+        }
+
+        if (direcciones == null) {
+            direcciones = new ArrayList<>();
+        }
+
+        if (direcciones.contains(direccion)) {
+            throw new DireccionInvalida("La dirección ya está registrada para este cliente");
+        }
+
+        direcciones.add(direccion);
+    }
+
+    public void eliminarDireccion(Direccion direccion) {
+        if (direccion == null) {
+            throw new DireccionInvalida("La dirección a eliminar no puede ser nula");
+        }
+
+        if (direcciones == null || direcciones.isEmpty()) {
+            throw new DireccionInvalida("El cliente no tiene direcciones registradas");
+        }
+
+        if (!direcciones.remove(direccion)) {
+            throw new DireccionInvalida("La dirección no pertenece a este cliente");
+        }
     }
 }

@@ -1,49 +1,66 @@
 package Marmoleria.Roma.demo.Modelos.Extras;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
-@Entity
+import java.util.Objects;
+
+@Embeddable
 public class Direccion {
 
-    @Id
-    @GeneratedValue
-    private long id;
-
     @NotBlank(message="La direccion debe poseer una calle...")
-    private String Calle;
+    private String calle;
 
     @NotBlank(message="La direccion debe poseer un numero...")
-    private String Numero;
+    private String numero;
 
     @NotBlank(message="La direccion debe poseer una localidad...")
-    private String Localidad;
+    private String localidad;
 
     public Direccion() {}
 
     public @NotBlank(message = "La direccion debe poseer una calle...") String getCalle() {
-        return Calle;
+        return calle;
     }
 
     public void setCalle(@NotBlank(message = "La direccion debe poseer una calle...") String calle) {
-        Calle = calle;
+        this.calle = calle;
     }
 
     public @NotBlank(message = "La direccion debe poseer un numero...") String getNumero() {
-        return Numero;
+        return numero;
     }
 
     public void setNumero(@NotBlank(message = "La direccion debe poseer un numero...") String numero) {
-        Numero = numero;
+        this.numero = numero;
     }
 
     public @NotBlank(message = "La direccion debe poseer una localidad...") String getLocalidad() {
-        return Localidad;
+        return localidad;
     }
 
     public void setLocalidad(@NotBlank(message = "La direccion debe poseer una localidad...") String localidad) {
-        Localidad = localidad;
+        this.localidad = localidad;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Direccion)) return false;
+        Direccion that = (Direccion) o;
+        return calle.equalsIgnoreCase(that.calle) &&
+                numero.equalsIgnoreCase(that.numero) &&
+                localidad.equalsIgnoreCase(that.localidad);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(calle.toLowerCase(), numero.toLowerCase(), localidad.toLowerCase());
+    }
+
+    @Override
+    public String toString() {
+        return calle + " " + numero + ", " + localidad;
     }
 }

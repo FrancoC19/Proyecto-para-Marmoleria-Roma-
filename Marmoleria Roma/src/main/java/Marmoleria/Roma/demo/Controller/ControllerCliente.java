@@ -61,18 +61,27 @@ public class ControllerCliente {
     public ResponseEntity<String> actualizarCliente(@PathVariable long dni, @RequestBody @Valid Cliente datosActualizados) {
         return Optional.ofNullable(serviceCliente.buscarClientePorDNI(dni))
                 .map(cliente -> {
-                    // Actualizamos los campos permitidos
+                    // Actualizamos los campos simples
                     cliente.setNombre(datosActualizados.getNombre());
                     cliente.setApellido(datosActualizados.getApellido());
                     cliente.setCorreo(datosActualizados.getCorreo());
                     cliente.setTelefono(datosActualizados.getTelefono());
+
+                    // ✅ Actualizamos la lista de direcciones (si se envía)
+                    if (datosActualizados.getDirecciones() != null) {
+                        cliente.getDirecciones().clear();
+                        cliente.getDirecciones().addAll(datosActualizados.getDirecciones());
+                    }
+
                     // Guardamos los cambios
                     serviceCliente.guardarCliente(cliente);
+
                     return ResponseEntity.ok("Cliente actualizado correctamente");
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Cliente no encontrado"));
     }
+
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','EMPLEADO')")
     @GetMapping("/clientes/{dni}/direcciones")

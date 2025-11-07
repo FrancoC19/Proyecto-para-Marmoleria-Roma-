@@ -67,14 +67,44 @@ public class ControllerPedidos {
     public ResponseEntity<String> actualizarPedido(@PathVariable long id, @RequestBody Pedidos pedidoActualizado) {
         return servicePedidos.pedidoSegunID(id)
                 .map(p -> {
-                    p.setEstado(pedidoActualizado.getEstado());
+                    // 🔹 Campos básicos
+                    p.setObservaciones(pedidoActualizado.getObservaciones());
+                    p.setSenia(pedidoActualizado.getSenia());
+                    p.setGriferia(pedidoActualizado.getGriferia());
+                    p.setMoldura(pedidoActualizado.getMoldura());
                     p.setFechaEntrega(pedidoActualizado.getFechaEntrega());
-                    p.setMaterial(pedidoActualizado.getMaterial());
+                    p.setFechaEmision(pedidoActualizado.getFechaEmision());
+                    p.setMetrosCuadrados(pedidoActualizado.getMetrosCuadrados());
+                    p.setDescuento(pedidoActualizado.getDescuento());
+                    p.setEstado(pedidoActualizado.getEstado());
+
+                    // 🔹 Relaciones (si vienen actualizadas en el JSON)
+                    if (pedidoActualizado.getCliente() != null)
+                        p.setCliente(pedidoActualizado.getCliente());
+
+                    if (pedidoActualizado.getEmpleado() != null)
+                        p.setEmpleado(pedidoActualizado.getEmpleado());
+
+                    if (pedidoActualizado.getMaterial() != null)
+                        p.setMaterial(pedidoActualizado.getMaterial());
+
+                    if (pedidoActualizado.getPileta() != null)
+                        p.setPileta(pedidoActualizado.getPileta());
+
+                    if (pedidoActualizado.getDireccion() != null)
+                        p.setDireccion(pedidoActualizado.getDireccion());
+
+                    // 🔹 Recalcular valor total del pedido
+                    p.calcularValor();
+
+                    // 🔹 Guardar cambios
                     servicePedidos.actualizarPedido(p);
+
                     return ResponseEntity.ok("Pedido actualizado correctamente.");
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
     @DeleteMapping("/Eliminar/{id}")
     public ResponseEntity<String> eliminarPedido(@PathVariable long id) {

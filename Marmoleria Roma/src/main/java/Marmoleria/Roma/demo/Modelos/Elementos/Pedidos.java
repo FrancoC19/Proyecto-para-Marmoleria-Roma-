@@ -78,8 +78,7 @@ public class Pedidos {
     @NotNull(message = "Debe especificarse el total de metros cuadrados")
     private Float metrosCuadrados;
 
-    @ManyToOne
-    @JoinColumn(name = "direccion_id")
+    @Embedded
     private Direccion direccion;
 
     protected String estado= EstadoPedido.EN_PROCESO.toString();
@@ -227,6 +226,14 @@ public class Pedidos {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public @NotNull(message = "El pedido debe tener un empleado asignado") Empleado getEmpleado() {
+        return empleado;
+    }
+
+    public void setEmpleado(@NotNull(message = "El pedido debe tener un empleado asignado") Empleado empleado) {
+        this.empleado = empleado;
     }
 
     /**
