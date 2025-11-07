@@ -1,6 +1,8 @@
 package Marmoleria.Roma.demo.Controller;
 
 import Marmoleria.Roma.demo.Excepciones.ClienteNoEncontrado;
+import Marmoleria.Roma.demo.Excepciones.DireccionNoEncontrada;
+import Marmoleria.Roma.demo.Modelos.Extras.Direccion;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Service.ServiceCliente;
 import jakarta.validation.Valid;
@@ -70,6 +72,16 @@ public class ControllerCliente {
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Cliente no encontrado"));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','EMPLEADO')")
+    @GetMapping("/clientes/{dni}/direcciones")
+    public List<Direccion> obtenerDireccionesCliente(@PathVariable long dni) {
+        List<Direccion> direcciones = serviceCliente.buscarDireccionesCliente(dni);
+        if (direcciones.isEmpty()) {
+            throw new DireccionNoEncontrada("No se encontró ninguna dirección relacionada a este cliente.");
+        }
+        return direcciones;
     }
 
 }

@@ -1,5 +1,6 @@
 package Marmoleria.Roma.demo.Modelos.Elementos;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
+import Marmoleria.Roma.demo.Modelos.Extras.Direccion;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
 import jakarta.persistence.*;
@@ -77,10 +78,22 @@ public class Pedidos {
     @NotNull(message = "Debe especificarse el total de metros cuadrados")
     private Float metrosCuadrados;
 
+    @ManyToOne
+    @JoinColumn(name = "direccion_id")
+    private Direccion direccion;
+
     protected String estado= EstadoPedido.EN_PROCESO.toString();
 
     private Float valorTotal;
     private Float descuento;
+
+    public Direccion getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(Direccion direccion) {
+        this.direccion = direccion;
+    }
 
     public Pedidos() {}
 
@@ -89,7 +102,7 @@ public class Pedidos {
             Cliente cliente, Float descuento, LocalDate fechaEmision,
             LocalDate fechaEntrega, String griferia, Materiales material,
             Float metrosCuadrados, String moldura, String observaciones,
-            Piletas pileta, Integer senia, Float valorTotal) {
+            Piletas pileta, Integer senia, Direccion direccion) {
 
         this.cliente = cliente;
         this.descuento = descuento;
@@ -102,7 +115,8 @@ public class Pedidos {
         this.observaciones = observaciones;
         this.pileta = pileta;
         this.senia = senia;
-        this.valorTotal = valorTotal;
+        this.direccion = direccion;
+        calcularValor();
     }
 
     // --- Getters y Setters ---
@@ -199,10 +213,6 @@ public class Pedidos {
         return valorTotal;
     }
 
-    public void setValorTotal(Float valorTotal) {
-        this.valorTotal = valorTotal;
-    }
-
     public Float getDescuento() {
         return descuento;
     }
@@ -223,7 +233,7 @@ public class Pedidos {
      * Calcula el valor total del pedido según:
      * (metros * valor del material) + valor pileta - descuento (si aplica)
      */
-    public float calcularValor() {
+    public void calcularValor() {
         float resultado = (this.metrosCuadrados * this.material.getValorMetroCuadrado())
                 + this.pileta.getValor();
 
@@ -231,6 +241,6 @@ public class Pedidos {
             resultado -= resultado * this.descuento;
         }
 
-        return resultado;
+       this.valorTotal=resultado;
     }
 }

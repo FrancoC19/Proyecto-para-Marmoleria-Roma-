@@ -1,11 +1,13 @@
 package Marmoleria.Roma.demo.Service;
 
+import Marmoleria.Roma.demo.Modelos.Extras.Direccion;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Repository.RepositoryCliente;
 import jakarta.persistence.Access;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,5 +27,11 @@ public class ServiceCliente {
     public Cliente buscarClientePorTelefono(String telefono){return repoCliente.findByTelefono(telefono);}
 
     public Cliente buscarClientePorCorreo(String correo){return repoCliente.findByCorreo(correo);}
+
+    public List<Direccion> buscarDireccionesCliente(Long dni) {
+        Cliente cliente = buscarClientePorDNI(dni);
+        return cliente.getDirecciones() != null ? cliente.getDirecciones() : new ArrayList<>();
+    }
+
 
 }

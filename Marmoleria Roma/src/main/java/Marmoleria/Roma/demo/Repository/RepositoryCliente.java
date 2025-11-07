@@ -1,4 +1,5 @@
 package Marmoleria.Roma.demo.Repository;
+import Marmoleria.Roma.demo.Modelos.Extras.Direccion;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
 

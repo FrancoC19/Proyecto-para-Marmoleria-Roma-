@@ -63,4 +63,8 @@ public class Cliente extends Persona {
             direcciones.add(direccion);
         }
     }
+
+    public List<Direccion> getDirecciones() {
+        return direcciones;
+    }
 }
