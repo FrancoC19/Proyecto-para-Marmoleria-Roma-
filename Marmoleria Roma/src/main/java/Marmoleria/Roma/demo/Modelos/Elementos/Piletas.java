@@ -3,6 +3,7 @@ package Marmoleria.Roma.demo.Modelos.Elementos;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 
 @Entity
@@ -27,8 +28,23 @@ public class Piletas {
     @DecimalMin(value = "1.0", message = "EL ancho no puede ser cero o negativo")
     private Float Ancho;
 
+    @DecimalMin(value="1.0",message ="La profundidad no puede ser negativa")
+    private float profundidad;
+
     @DecimalMin(value="0",message = "El valor de la pileta no pueed ser menor a 0")
     private Float valor;
+
+    @NotNull(message = "EL valor no puede ser negativo")
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(@NotNull(message = "EL valor no puede ser negativo") int cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    @NotNull( message = "EL valor no puede ser negativo")
+    private int cantidad;
 
     public Piletas() {}
 
@@ -76,5 +92,14 @@ public class Piletas {
 
     public void setValor(@DecimalMin(value = "0", message = "El valor de la pileta no pueed ser menor a 0") Float valor) {
         this.valor = valor;
+    }
+
+    @DecimalMin(value = "1.0", message = "La profundidad no puede ser negativa")
+    public float getProfundidad() {
+        return profundidad;
+    }
+
+    public void setProfundidad(@DecimalMin(value = "1.0", message = "La profundidad no puede ser negativa") float profundidad) {
+        this.profundidad = profundidad;
     }
 }

@@ -1,5 +1,7 @@
 package Marmoleria.Roma.demo.Modelos.Elementos;
+import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
+import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -32,6 +34,12 @@ public class Pedidos {
     @JoinColumn(name = "id_cliente", nullable = false)
     @NotNull(message = "El pedido debe tener un cliente")
     private Cliente cliente;
+
+    // 🔹 NUEVO CAMPO: relación con empleado
+    @ManyToOne
+    @JoinColumn(name = "id_empleado", nullable = false)
+    @NotNull(message = "El pedido debe tener un empleado asignado")
+    private Empleado empleado;
 
     @Min(value = 0, message = "La seña no puede ser menor a 0")
     private Integer senia;
@@ -68,6 +76,8 @@ public class Pedidos {
 
     @NotNull(message = "Debe especificarse el total de metros cuadrados")
     private Float metrosCuadrados;
+
+    protected String estado= EstadoPedido.EN_PROCESO.toString();
 
     private Float valorTotal;
     private Float descuento;
@@ -199,6 +209,14 @@ public class Pedidos {
 
     public void setDescuento(Float descuento) {
         this.descuento = descuento;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     /**
