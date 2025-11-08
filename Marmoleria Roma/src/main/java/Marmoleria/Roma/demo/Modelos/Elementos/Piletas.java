@@ -15,10 +15,10 @@ public class Piletas {
     private Long id_pileta;
 
     @NotBlank(message = "La pileta debe poseer una marca...")
-    private String Marca;
+    private String marca;
 
     @NotBlank(message = "La pileta debe poseer un modelo...")
-    private String Modelo;
+    private String modelo;
 
 
     @DecimalMin(value = "1.0", message = "El largo no puede ser cero o negativo")
@@ -26,7 +26,7 @@ public class Piletas {
 
 
     @DecimalMin(value = "1.0", message = "EL ancho no puede ser cero o negativo")
-    private Float Ancho;
+    private Float ancho;
 
     @DecimalMin(value="1.0",message ="La profundidad no puede ser negativa")
     private float profundidad;
@@ -55,19 +55,19 @@ public class Piletas {
 
 
     public @NotBlank(message = "La pileta debe poseer una marca...") String getMarca() {
-        return Marca;
+        return marca;
     }
 
     public void setMarca(@NotBlank(message = "La pileta debe poseer una marca...") String marca) {
-        Marca = marca;
+        marca = marca;
     }
 
     public @NotBlank(message = "La pileta debe poseer un modelo...") String getModelo() {
-        return Modelo;
+        return modelo;
     }
 
     public void setModelo(@NotBlank(message = "La pileta debe poseer un modelo...") String modelo) {
-        Modelo = modelo;
+        modelo = modelo;
     }
 
     public  @DecimalMin(value = "1.0", message = "El largo no puede ser cero o negativo") Float getLargo() {
@@ -79,11 +79,11 @@ public class Piletas {
     }
 
     public  @DecimalMin(value = "1.0", message = "EL ancho no puede ser cero o negativo") Float getAncho() {
-        return Ancho;
+        return ancho;
     }
 
     public void setAncho( @DecimalMin(value = "1.0", message = "EL ancho no puede ser cero o negativo") Float ancho) {
-        Ancho = ancho;
+        ancho = ancho;
     }
 
     public @DecimalMin(value = "0", message = "El valor de la pileta no pueed ser menor a 0") Float getValor() {

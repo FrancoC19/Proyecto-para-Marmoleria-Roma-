@@ -5,10 +5,12 @@ import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Repository
 public interface RepositoryPedidos extends JpaRepository<Pedidos, Long> {
 
     List<Pedidos> findByCliente(Cliente cliente);

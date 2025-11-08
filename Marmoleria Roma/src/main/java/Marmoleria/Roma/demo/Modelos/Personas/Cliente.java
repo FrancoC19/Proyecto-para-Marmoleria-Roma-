@@ -14,13 +14,8 @@ import java.util.List;
 @Entity
 public class Cliente extends Persona {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_Cliente")
-    @SequenceGenerator(name = "id_Cliente", sequenceName = "id_Cliente", allocationSize = 1)
-    protected long id_Cliente;
-
     @NotBlank(message="El Cliente debe poseer un apellido...")
-    private String Apellido;
+    private String apellido;
 
     @NotNull(message = "El cliente debe tener un telefono...")
     @Size(min=10,max = 10, message = "El numero debe contac con 10 caracteres, 3 del area y 7 identificativo")
@@ -35,17 +30,17 @@ public class Cliente extends Persona {
 
     public Cliente(Long DNI, String correo, String nombre, String apellido, String telefono){
         super(DNI, correo, nombre);
-        this.Apellido = apellido;
+        this.apellido = apellido;
         this.telefono = telefono;
         this.direcciones = new ArrayList<>();
     }
 
     public @NotBlank(message = "El Cliente debe poseer un apellido...") String getApellido() {
-        return Apellido;
+        return apellido;
     }
 
     public void setApellido(@NotBlank(message = "El Cliente debe poseer un apellido...") String apellido) {
-        Apellido = apellido;
+        apellido = apellido;
     }
 
     public @NotNull(message = "El cliente debe tener un telefono...") @Size(min = 10, max = 10, message = "El numero debe contac con 10 caracteres, 3 del area y 7 identificativo") @Pattern(regexp = "\\d{10}", message = "El teléfono solo puede contener números") String getTelefono() {
