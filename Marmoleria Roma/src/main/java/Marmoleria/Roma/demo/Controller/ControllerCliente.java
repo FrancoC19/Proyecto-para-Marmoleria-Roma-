@@ -25,7 +25,7 @@ public class ControllerCliente {
     private ServiceCliente serviceCliente;
 
 
-    @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PostMapping("/Guardar")
     public ResponseEntity<String> guardarCliente(@RequestBody @Valid Cliente cliente) {
         Cliente existente = serviceCliente.buscarClientePorDNI(cliente.getDNI());
@@ -50,13 +50,13 @@ public class ControllerCliente {
         return existente;
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','EMPLEADO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/Todos")
     public List<Cliente> obtenerTodosLosClientes() {
         return serviceCliente.buscarClientes().orElseThrow(()-> new ClienteNoEncontrado("no se encontraron los Clientes"));
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','EMPLEADO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PutMapping("/{dni}")
     public ResponseEntity<String> actualizarCliente(@PathVariable long dni, @RequestBody @Valid Cliente datosActualizados) {
         return Optional.ofNullable(serviceCliente.buscarClientePorDNI(dni))
@@ -83,7 +83,7 @@ public class ControllerCliente {
     }
 
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','EMPLEADO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/clientes/{dni}/direcciones")
     public List<Direccion> obtenerDireccionesCliente(@PathVariable long dni) {
         List<Direccion> direcciones = serviceCliente.buscarDireccionesCliente(dni);

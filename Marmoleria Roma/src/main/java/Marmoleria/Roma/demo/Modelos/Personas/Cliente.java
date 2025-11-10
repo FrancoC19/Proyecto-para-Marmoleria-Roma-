@@ -40,7 +40,7 @@ public class Cliente extends Persona {
     }
 
     public void setApellido(@NotBlank(message = "El Cliente debe poseer un apellido...") String apellido) {
-        apellido = apellido;
+       this.apellido = apellido;
     }
 
     public @NotNull(message = "El cliente debe tener un telefono...") @Size(min = 10, max = 10, message = "El numero debe contac con 10 caracteres, 3 del area y 7 identificativo") @Pattern(regexp = "\\d{10}", message = "El teléfono solo puede contener números") String getTelefono() {
