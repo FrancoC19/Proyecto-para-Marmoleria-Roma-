@@ -93,18 +93,21 @@ public class ControllerCliente {
         return direcciones;
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PostMapping("/agregarDireccion/{dni}")
     public ResponseEntity<String> agregarDireccion(@PathVariable Long dni, @RequestBody Direccion direccion) {
         serviceCliente.agregarDireccionCliente(dni, direccion);
         return ResponseEntity.ok("Dirección agregada correctamente");
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @DeleteMapping("/eliminarDireccion/{dni}")
     public ResponseEntity<String> eliminarDireccion(@PathVariable Long dni, @RequestBody Direccion direccion) {
         serviceCliente.eliminarDireccionCliente(dni, direccion);
         return ResponseEntity.ok("Dirección eliminada correctamente");
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/buscarNombreyApellido")
     public ResponseEntity<Cliente> buscarClientePorNombreYApellido(@RequestParam String nombre, @RequestParam String apellido) {
         Cliente cliente = serviceCliente.buscarClientePorNombreYApellido(nombre, apellido);
@@ -115,6 +118,7 @@ public class ControllerCliente {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/telefono/{telefono}")
     public ResponseEntity<Cliente> buscarClientePorTelefono(@PathVariable String telefono) {
         Cliente cliente = serviceCliente.buscarClientePorTelefono(telefono);
@@ -126,6 +130,7 @@ public class ControllerCliente {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/correo/{correo}")
     public ResponseEntity<Cliente> buscarClientePorCorreo(@PathVariable String correo) {
         Cliente cliente = serviceCliente.buscarClientePorCorreo(correo);
@@ -137,7 +142,7 @@ public class ControllerCliente {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR','EMPLEADO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/clientes/buscar")
     public ResponseEntity<?> buscarClientes(
             @RequestParam(required = false) String nombre,
