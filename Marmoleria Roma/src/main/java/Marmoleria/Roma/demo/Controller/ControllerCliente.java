@@ -53,7 +53,7 @@ public class ControllerCliente {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/Todos")
     public List<Cliente> obtenerTodosLosClientes() {
-        return serviceCliente.buscarClientes().orElseThrow(()-> new ClienteNoEncontrado("no se encontraron los Clientes"));
+        return serviceCliente.buscarTodosClientes().orElseThrow(()-> new ClienteNoEncontrado("no se encontraron los Clientes"));
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
@@ -84,13 +84,76 @@ public class ControllerCliente {
 
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
-    @GetMapping("/clientes/{dni}/direcciones")
+    @GetMapping("/direcciones/{dni}")
     public List<Direccion> obtenerDireccionesCliente(@PathVariable long dni) {
         List<Direccion> direcciones = serviceCliente.buscarDireccionesCliente(dni);
         if (direcciones.isEmpty()) {
             throw new DireccionNoEncontrada("No se encontró ninguna dirección relacionada a este cliente.");
         }
         return direcciones;
+    }
+
+    @PostMapping("/agregarDireccion/{dni}")
+    public ResponseEntity<String> agregarDireccion(@PathVariable Long dni, @RequestBody Direccion direccion) {
+        serviceCliente.agregarDireccionCliente(dni, direccion);
+        return ResponseEntity.ok("Dirección agregada correctamente");
+    }
+
+    @DeleteMapping("/eliminarDireccion/{dni}")
+    public ResponseEntity<String> eliminarDireccion(@PathVariable Long dni, @RequestBody Direccion direccion) {
+        serviceCliente.eliminarDireccionCliente(dni, direccion);
+        return ResponseEntity.ok("Dirección eliminada correctamente");
+    }
+
+    @GetMapping("/buscarNombreyApellido")
+    public ResponseEntity<Cliente> buscarClientePorNombreYApellido(@RequestParam String nombre, @RequestParam String apellido) {
+        Cliente cliente = serviceCliente.buscarClientePorNombreYApellido(nombre, apellido);
+        if (cliente != null) {
+            return ResponseEntity.ok(cliente);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/telefono/{telefono}")
+    public ResponseEntity<Cliente> buscarClientePorTelefono(@PathVariable String telefono) {
+        Cliente cliente = serviceCliente.buscarClientePorTelefono(telefono);
+
+        if (cliente != null) {
+            return ResponseEntity.ok(cliente);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/correo/{correo}")
+    public ResponseEntity<Cliente> buscarClientePorCorreo(@PathVariable String correo) {
+        Cliente cliente = serviceCliente.buscarClientePorCorreo(correo);
+
+        if (cliente != null) {
+            return ResponseEntity.ok(cliente);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR','EMPLEADO')")
+    @GetMapping("/clientes/buscar")
+    public ResponseEntity<?> buscarClientes(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String apellido,
+            @RequestParam(required = false) String telefono,
+            @RequestParam(required = false) String correo,
+            @RequestParam(required = false) Long dni) {
+
+        List<Cliente> resultados = serviceCliente.buscarClientes(nombre, apellido, telefono, correo, dni);
+
+        if (resultados.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No se encontraron clientes con los datos proporcionados");
+        } else {
+            return ResponseEntity.ok(resultados);
+        }
     }
 
 }
