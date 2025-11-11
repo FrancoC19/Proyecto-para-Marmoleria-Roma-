@@ -20,6 +20,9 @@ public class ServicePedidos {
     @Autowired
     private RepositoryPedidos repositoryPedidos;
 
+    @Autowired
+    private EmailService emailService;
+
     public void guardarPedidos(Pedidos pedidos) {
         repositoryPedidos.save(pedidos);
     }
@@ -71,6 +74,7 @@ public class ServicePedidos {
 
         if (estadoActual.equalsIgnoreCase(EstadoPedido.EN_PROCESO.toString())) {
             pedido.setEstado(EstadoPedido.PENDIENTE_DE_ENTREGA.toString());
+            emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
         } else if (estadoActual.equalsIgnoreCase(EstadoPedido.PENDIENTE_DE_ENTREGA.toString())) {
             pedido.setEstado(EstadoPedido.ENTREGADO.toString());
         }
