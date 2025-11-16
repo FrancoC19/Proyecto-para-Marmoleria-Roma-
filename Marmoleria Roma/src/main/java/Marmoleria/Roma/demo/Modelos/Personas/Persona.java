@@ -1,5 +1,6 @@
 package Marmoleria.Roma.demo.Modelos.Personas;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 public abstract class Persona {
 
     @Id
+    @JsonProperty("dni")
     protected Long DNI;
 
     @NotBlank(message="El Cliente debe poseer un correo...")
@@ -23,11 +25,11 @@ public abstract class Persona {
         this.correo = correo;
         this.nombre = nombre;
     }
-
+    @JsonProperty("dni")
     public Long getDNI() {
         return DNI;
     }
-
+    @JsonProperty("dni")
     public void setDNI(Long DNI) {
         this.DNI = DNI;
     }

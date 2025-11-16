@@ -84,7 +84,7 @@ public class ControllerPedidos {
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
-    @PutMapping("/Actualizar/{id}")
+    @PutMapping("/ActualizarDatos/{id}")
     public ResponseEntity<String> actualizarPedido(@PathVariable long id, @RequestBody Pedidos pedidoActualizado) {
         return servicePedidos.pedidoSegunID(id)
                 .map(p -> {
@@ -119,7 +119,7 @@ public class ControllerPedidos {
                     p.calcularValor();
 
                     // 🔹 Guardar cambios
-                    servicePedidos.actualizarPedido(p);
+                    servicePedidos.guardarPedidos(p);
 
                     return ResponseEntity.ok("Pedido actualizado correctamente.");
                 })
@@ -147,7 +147,7 @@ public class ControllerPedidos {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/Empleado/{dni}")
     public ResponseEntity<List<Pedidos>> obtenerPorEmpleado(@PathVariable long dni) {
-        var empleado = serviceEmpleado.buscarEmpladoPorDNI(dni);
+        var empleado = serviceEmpleado.buscarEmpleadoPorDNI(dni);
         if (empleado == null)
             return ResponseEntity.notFound().build();
 
@@ -172,13 +172,20 @@ public class ControllerPedidos {
     public ResponseEntity<List<Pedidos>> obtenerPorClienteYEmpleado(@RequestParam long dniCliente, @RequestParam long dniEmpleado) {
 
         var cliente = serviceCliente.buscarClientePorDNI(dniCliente);
-        var empleado = serviceEmpleado.buscarEmpladoPorDNI(dniEmpleado);
+        var empleado = serviceEmpleado.buscarEmpleadoPorDNI(dniEmpleado);
 
         if (cliente == null || empleado == null)
             return ResponseEntity.notFound().build();
 
         List<Pedidos> pedidos = servicePedidos.pedidosSegunClienteyEmpleado(cliente, empleado).orElse(List.of());
         return ResponseEntity.ok(pedidos);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
+    @PutMapping ("/Finalizar")
+    public ResponseEntity<String> ActualizarEstado(@RequestBody Pedidos pedido) {
+        servicePedidos.actualizarPedido(pedido);
+        return ResponseEntity.ok("Pedido eliminado correctamente.");
     }
 
 }

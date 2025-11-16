@@ -3,10 +3,14 @@ package Marmoleria.Roma.demo.Service;
 import Marmoleria.Roma.demo.Excepciones.FechaIlegal;
 import Marmoleria.Roma.demo.Modelos.Elementos.Materiales;
 import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
+import Marmoleria.Roma.demo.Modelos.Elementos.Piletas;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
 import Marmoleria.Roma.demo.Repository.RepositoryPedidos;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +24,59 @@ public class ServicePedidos {
     @Autowired
     private RepositoryPedidos repositoryPedidos;
 
-    public void guardarPedidos(Pedidos pedidos) {
-        repositoryPedidos.save(pedidos);
+    @Autowired
+    private EmailService emailService;
+    @PersistenceContext
+    private EntityManager entityManager;
+
+
+    @Transactional
+    public Pedidos guardarPedidos(Pedidos pedido) {
+        // Validar y buscar Cliente
+        if (pedido.getCliente() == null || pedido.getCliente().getDNI() == null) {
+            throw new IllegalArgumentException("El ID del cliente es obligatorio");
+        }
+        Cliente clientePersistido = entityManager.find(Cliente.class, pedido.getCliente().getDNI());
+        if (clientePersistido == null) {
+            throw new IllegalArgumentException("Cliente no encontrado con ID: " + pedido.getCliente().getDNI());
+        }
+        pedido.setCliente(clientePersistido);
+
+        // Validar y buscar Empleado
+        if (pedido.getEmpleado() == null || pedido.getEmpleado().getDNI() == null) {
+            throw new IllegalArgumentException("El ID del empleado es obligatorio");
+        }
+        Empleado empleadoPersistido = entityManager.find(Empleado.class, pedido.getEmpleado().getDNI());
+        if (empleadoPersistido == null) {
+            throw new IllegalArgumentException("Empleado no encontrado con ID: " + pedido.getEmpleado().getDNI());
+        }
+        pedido.setEmpleado(empleadoPersistido);
+
+        // Validar y buscar Material
+        if (pedido.getMaterial() == null || pedido.getMaterial().getId() == null) {
+            throw new IllegalArgumentException("El ID del material es obligatorio");
+        }
+        Materiales materialPersistido = entityManager.find(Materiales.class, pedido.getMaterial().getId());
+        if (materialPersistido == null) {
+            throw new IllegalArgumentException("Material no encontrado con ID: " + pedido.getMaterial().getId());
+        }
+        pedido.setMaterial(materialPersistido);
+
+        // Validar y buscar Pileta
+        if (pedido.getPileta() == null || pedido.getPileta().getId() == null) {
+            throw new IllegalArgumentException("El ID de la pileta es obligatorio");
+        }
+        Piletas piletaPersistida = entityManager.find(Piletas.class, pedido.getPileta().getId());
+        if (piletaPersistida == null) {
+            throw new IllegalArgumentException("Pileta no encontrada con ID: " + pedido.getPileta().getId());
+        }
+        pedido.setPileta(piletaPersistida);
+
+        // Guardar Pedido
+        return repositoryPedidos.save(pedido);
     }
+
+
 
     public Optional<List<Pedidos>> todosLosPedidos() {
         return Optional.of(repositoryPedidos.findAll());
@@ -71,6 +125,7 @@ public class ServicePedidos {
 
         if (estadoActual.equalsIgnoreCase(EstadoPedido.EN_PROCESO.toString())) {
             pedido.setEstado(EstadoPedido.PENDIENTE_DE_ENTREGA.toString());
+            emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
         } else if (estadoActual.equalsIgnoreCase(EstadoPedido.PENDIENTE_DE_ENTREGA.toString())) {
             pedido.setEstado(EstadoPedido.ENTREGADO.toString());
         }

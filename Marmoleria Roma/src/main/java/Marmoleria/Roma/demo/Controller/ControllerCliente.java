@@ -14,7 +14,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -27,7 +29,7 @@ public class ControllerCliente {
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PostMapping("/Guardar")
-    public ResponseEntity<String> guardarCliente(@RequestBody @Valid Cliente cliente) {
+    public ResponseEntity<Map<String, String>> guardarCliente(@RequestBody @Valid Cliente cliente) {
         Cliente existente = serviceCliente.buscarClientePorDNI(cliente.getDNI());
 
         if (existente != null) {
@@ -35,7 +37,9 @@ public class ControllerCliente {
         }
 
         serviceCliente.guardarCliente(cliente);
-        return ResponseEntity.ok("Cliente guardado correctamente");
+        Map<String, String> resp = new HashMap<>();
+        resp.put("mensaje", "Empleado guardado correctamente");
+        return ResponseEntity.ok(resp);
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")

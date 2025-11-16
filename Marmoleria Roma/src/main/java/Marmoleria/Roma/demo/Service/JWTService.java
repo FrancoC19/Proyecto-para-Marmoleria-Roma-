@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class JWTService {
@@ -28,7 +29,9 @@ public class JWTService {
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername()) // El "dueño" del token (ej: email)
-                .claim("roles", userDetails.getAuthorities()) // Información adicional: los roles del usuario
+                .claim("roles", userDetails.getAuthorities().stream()
+                        .map(a -> a.getAuthority())
+                        .toList())
                 .setIssuedAt(new Date(System.currentTimeMillis())) // Cuándo fue generado
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Expira en 1 hora
                 .signWith(getKey(), SignatureAlgorithm.HS256) // Firma el token con HS256 y la clave secreta
@@ -64,5 +67,8 @@ public class JWTService {
     private Key getKey() {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+    public List<String> extractRoles(String token) {
+        return (List<String>) extractAllClaims(token).get("roles");
     }
 }

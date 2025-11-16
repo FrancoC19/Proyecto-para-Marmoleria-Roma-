@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "Usuarios-Sistema")
 public class Usuario implements UserDetails {
 
     @Id

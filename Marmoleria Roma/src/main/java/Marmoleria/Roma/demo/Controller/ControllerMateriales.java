@@ -13,7 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -23,15 +25,18 @@ public class ControllerMateriales {
     @Autowired
     ServiceMateriales serviceMateriales;
 
+
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @PostMapping("/Guardar")
-    public ResponseEntity<String> guardarMateriales(@RequestBody @Valid Materiales material) {
+    public ResponseEntity<Map<String, String>> guardarMateriales(@RequestBody @Valid Materiales material) {
         Materiales Existente= serviceMateriales.buscarPorId(material.getId());
         if(Existente!=null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Ya existe este material");
         }
         serviceMateriales.guardarMaterial(material);
-        return ResponseEntity.ok("Material guardado correctamente");
+        Map<String, String> response = new HashMap<>();
+        response.put("mensaje", "Material guardado correctamente");
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
