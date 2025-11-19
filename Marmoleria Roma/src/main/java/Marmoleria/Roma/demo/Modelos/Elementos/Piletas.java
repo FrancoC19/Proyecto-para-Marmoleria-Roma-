@@ -1,10 +1,13 @@
 package Marmoleria.Roma.demo.Modelos.Elementos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 
 @Entity
@@ -37,6 +40,9 @@ public class Piletas {
 
     @DecimalMin(value="0",message = "El valor de la pileta no pueed ser menor a 0")
     private Float valor;
+    @NotNull( message = "EL valor no puede ser negativo")
+    private int cantidad;
+
 
     @NotNull(message = "EL valor no puede ser negativo")
     public int getCantidad() {
@@ -47,8 +53,7 @@ public class Piletas {
         this.cantidad = cantidad;
     }
 
-    @NotNull( message = "EL valor no puede ser negativo")
-    private int cantidad;
+
 
     public Piletas() {}
 

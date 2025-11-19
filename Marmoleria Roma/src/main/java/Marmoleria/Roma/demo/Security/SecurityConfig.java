@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ nuevo formato
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/login", "/auth/verificarToken").permitAll()
+                        .requestMatchers("/auth/login", "/auth/verificarToken","/notificaciones/todas").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/user/**").hasAnyRole("USUARIO", "ADMINISTRADOR")
                         .anyRequest().authenticated()

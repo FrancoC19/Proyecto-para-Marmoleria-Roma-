@@ -54,21 +54,21 @@ public class ControllerPiletas {
 
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Modelo}")
+    @GetMapping("/BuscarModelo/{Modelo}")
     public List<Piletas> buscarPileta(@PathVariable String Modelo){
         return servicePiletas.buscarPorModelo(Modelo).orElseThrow(()-> new PiletaNoEncontrada("Este modelo no se encontro: "+Modelo));
 
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Marca}")
+    @GetMapping("/BuscarMarca/{Marca}")
     public List<Piletas> buscarPiletaPorMarca(@PathVariable String Marca){
         return servicePiletas.buscarPorMarca(Marca).orElseThrow(()->new PiletaNoEncontrada("No se encontro esta marca: "+Marca));
 
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Modelo}/{Marca}")
+    @GetMapping("/BuscarModeloyMarca/{Modelo}/{Marca}")
     public List<Piletas> buscarPorMarcaYModelo(@PathVariable String Modelo, @PathVariable String Marca){
         return servicePiletas.buscarModeloYMarca(Marca,Modelo).orElseThrow(()-> new PiletaNoEncontrada("No se encontro este modelo relacionada con la marca seleccionada"));
     }
@@ -80,6 +80,12 @@ public class ControllerPiletas {
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @GetMapping("/BuscarId/{id}")
+    public Piletas buscarPorId(@PathVariable long id){
+        return servicePiletas.buscarPorId(id);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/Eliminar/{id}")
     public ResponseEntity<String> eliminarPileta(@PathVariable long id){
         Piletas pileta = servicePiletas.buscarPorId(id);
@@ -91,17 +97,18 @@ public class ControllerPiletas {
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @PutMapping("/Modificar/{id}")
-    public ResponseEntity<String> modificarPileta(@PathVariable long id_Pileta,@RequestBody Piletas DatosActualizados){
-        return Optional.ofNullable(servicePiletas.buscarPorId(id_Pileta))
+    @PutMapping("/Modificar/{id_pileta}")
+    public ResponseEntity<Piletas> modificarPileta(@PathVariable  long id_pileta,@RequestBody Piletas DatosActualizados){
+        return Optional.ofNullable(servicePiletas.buscarPorId(id_pileta))
                 .map(pileta->{
                     pileta.setMarca(DatosActualizados.getMarca());
                     pileta.setModelo(DatosActualizados.getModelo());
                     pileta.setCantidad(DatosActualizados.getCantidad());
                     pileta.setAncho(DatosActualizados.getAncho());
                     pileta.setLargo(DatosActualizados.getLargo());
-                    return ResponseEntity.ok("Pileta modificada correctamente");
-                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pileta No Encontrada"));
+                    servicePiletas.guardarPileta(pileta);
+                    return ResponseEntity.ok(pileta);
+                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")

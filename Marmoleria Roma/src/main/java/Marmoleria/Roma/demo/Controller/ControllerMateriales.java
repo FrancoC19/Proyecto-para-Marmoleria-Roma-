@@ -38,9 +38,21 @@ public class ControllerMateriales {
         response.put("mensaje", "Material guardado correctamente");
         return ResponseEntity.ok(response);
     }
+    @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @GetMapping("/Buscar/{id}")
+    public Materiales buscarMaterial(@PathVariable int id) {
+
+        Materiales Existente= serviceMateriales.buscarPorId(id);
+        if(Existente==null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"No se encuentra el material");
+        }
+        return Existente;
+    }
+
+
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Nombre}")
+    @GetMapping("/BuscarNombre/{Nombre}")
     public Materiales buscarMateriales(@PathVariable String Nombre) {
         Materiales Existente= serviceMateriales.buscarPorNombre(Nombre);
         if(Existente==null) {
@@ -57,15 +69,15 @@ public class ControllerMateriales {
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @PutMapping("/Modificar/{id_Material}")
-    public ResponseEntity<String> modificarMaterial(@RequestBody @Valid Materiales datosActualizados, @PathVariable int id_Material) {
+    public ResponseEntity<Materiales> modificarMaterial(@RequestBody @Valid Materiales datosActualizados, @PathVariable int id_Material) {
         return Optional.ofNullable(serviceMateriales.buscarPorId(id_Material))
                 .map(material->{
                     material.setNombreMaterial(datosActualizados.getNombreMaterial());
                     material.setTipoMaterial(datosActualizados.getTipoMaterial());
                     material.setValorMetroCuadrado(datosActualizados.getValorMetroCuadrado());
                     serviceMateriales.guardarMaterial(material);
-                    return ResponseEntity.ok("Material modificado correctamente");
-                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado"));
+                    return ResponseEntity.ok(material);
+                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
     }
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")

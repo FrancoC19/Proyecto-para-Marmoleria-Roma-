@@ -1,4 +1,5 @@
 package Marmoleria.Roma.demo.Service;
+import Marmoleria.Roma.demo.Modelos.Personas.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.List;
 
 @Service
 public class JWTService {
@@ -28,15 +28,15 @@ public class JWTService {
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername()) // El "dueño" del token (ej: email)
-                .claim("roles", userDetails.getAuthorities().stream()
-                        .map(a -> a.getAuthority())
-                        .toList())
-                .setIssuedAt(new Date(System.currentTimeMillis())) // Cuándo fue generado
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Expira en 1 hora
-                .signWith(getKey(), SignatureAlgorithm.HS256) // Firma el token con HS256 y la clave secreta
+                .setSubject(userDetails.getUsername()) // email
+                .claim("roles", userDetails.getAuthorities())
+                .claim("tipoUsuario", ((Usuario) userDetails).getTipoUsuario().name()) // ← agregado
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hora
+                .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
 
     // Verifica si un token es válido para un usuario dado
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -48,7 +48,6 @@ public class JWTService {
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
-
     // Verifica si el token está vencido
     private boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
@@ -67,8 +66,5 @@ public class JWTService {
     private Key getKey() {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-    public List<String> extractRoles(String token) {
-        return (List<String>) extractAllClaims(token).get("roles");
     }
 }

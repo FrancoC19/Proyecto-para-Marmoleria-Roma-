@@ -55,4 +55,8 @@ public class ServiceCliente {
         return repoCliente.buscarPorFiltros(nombre, apellido, telefono, correo, dni);
     }
 
+    public void eliminarCliente(Long dni){
+         repoCliente.deleteById(dni);
+    }
+
 }

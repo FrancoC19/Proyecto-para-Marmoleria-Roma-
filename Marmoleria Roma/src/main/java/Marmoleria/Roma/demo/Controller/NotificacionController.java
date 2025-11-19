@@ -3,6 +3,7 @@ package Marmoleria.Roma.demo.Controller;
 import Marmoleria.Roma.demo.Modelos.Extras.Notificacion;
 import Marmoleria.Roma.demo.Service.NotificacionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class NotificacionController {
     @Autowired
     private NotificacionService notificacionService;
 
-    @GetMapping
+    @GetMapping("/todas")
     public List<Notificacion> getNotificaciones() {
         return notificacionService.obtenerNotificaciones();
     }

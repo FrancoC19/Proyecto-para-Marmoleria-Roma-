@@ -1,10 +1,13 @@
 package Marmoleria.Roma.demo.Modelos.Elementos;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.TipoMaterial;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 @Entity
 public class Materiales {
@@ -24,6 +27,11 @@ public class Materiales {
     @NotNull(message = "El material debe poseer un tipo...")
     @Enumerated(EnumType.STRING)
     private TipoMaterial tipoMaterial;
+
+    // 🔹 Nueva relación con pedidos
+    @OneToMany(mappedBy = "material", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private List<Pedidos> pedidos;
 
     public Materiales() {}
 

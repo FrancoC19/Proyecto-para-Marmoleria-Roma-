@@ -62,7 +62,7 @@ public class ControllerCliente {
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PutMapping("/{dni}")
-    public ResponseEntity<String> actualizarCliente(@PathVariable long dni, @RequestBody @Valid Cliente datosActualizados) {
+    public ResponseEntity<Cliente> actualizarCliente(@PathVariable long dni, @RequestBody @Valid Cliente datosActualizados) {
         return Optional.ofNullable(serviceCliente.buscarClientePorDNI(dni))
                 .map(cliente -> {
                     // Actualizamos los campos simples
@@ -80,10 +80,10 @@ public class ControllerCliente {
                     // Guardamos los cambios
                     serviceCliente.guardarCliente(cliente);
 
-                    return ResponseEntity.ok("Cliente actualizado correctamente");
+                    return ResponseEntity.ok( cliente);
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Cliente no encontrado"));
+                        .build());
     }
 
 
@@ -163,6 +163,11 @@ public class ControllerCliente {
         } else {
             return ResponseEntity.ok(resultados);
         }
+    }
+    @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @DeleteMapping("/Eliminar/{dni}")
+    public void eliminar(@PathVariable long dni) {
+        serviceCliente.eliminarCliente(dni);
     }
 
 }

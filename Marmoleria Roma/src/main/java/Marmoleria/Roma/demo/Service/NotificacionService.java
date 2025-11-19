@@ -4,11 +4,12 @@ import Marmoleria.Roma.demo.Modelos.Extras.Notificacion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class NotificacionService {
 
     @Autowired
@@ -16,7 +17,7 @@ public class NotificacionService {
 
     private final List<Notificacion> notificaciones = new ArrayList<>();
 
-    @Scheduled(cron = "0 0 9,15 * * *")
+    @Scheduled(cron = "0 0 9,15 * * *", initialDelay = 0)
     public void notificarPedidosProximos() {
         notificaciones.clear(); // 🧹 limpia notificaciones anteriores
 

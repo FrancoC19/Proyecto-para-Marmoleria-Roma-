@@ -27,18 +27,13 @@ public class ControllerUsuario {
         return serviceUsuario.todosLosUsuarios().orElseThrow(()-> new UsuarioNoEncontrado("No se encontro el usuario"));
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/Guardar")
     public ResponseEntity<String> guardarUsuario(@RequestBody Usuario usuario){
-        Usuario existente= serviceUsuario.buscarPorId(usuario.getId());
-
-        if(existente!=null){
-            throw new  ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe este usuario");
-        }
         serviceUsuario.guardarUsuario(usuario);
         return ResponseEntity.ok("Usuario guardado correctamente");
-
     }
+
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
     @GetMapping("/Tipo/{tipo}")
     public List<Usuario> buscarPorTipo(@PathVariable TipoUsuario tipo){
@@ -62,21 +57,23 @@ public class ControllerUsuario {
         return ResponseEntity.ok("Usuario eliminado correctamente");
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
-    @PutMapping("/Modificar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
+    @PutMapping("/Modificar/{id}")
     public ResponseEntity<String> modificarUsuario(@RequestBody Usuario DatosActualizados,@PathVariable long id){
         return Optional.ofNullable(serviceUsuario.buscarPorId(id))
                 .map(usuario->{
-                    DatosActualizados.setEmail(usuario.getEmail());
-                    DatosActualizados.setContra(usuario.getContra());
+                    usuario.setEmail(DatosActualizados.getEmail());
+                    usuario.setTipoUsuario(DatosActualizados.getTipoUsuario());
+                    serviceUsuario.guardarUsuario(usuario);
                     return ResponseEntity.ok("Usuario modificado correctamente");
                 }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontro el usuario"));
 
     }
 
-
-
-
-
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
+    @GetMapping("/buscarPorID/{id}")
+    public Usuario buscarPorID(@PathVariable long id){
+        return serviceUsuario.buscarPorId(id);
+    }
 
 }
