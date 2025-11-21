@@ -4,18 +4,20 @@ import Marmoleria.Roma.demo.Excepciones.FechaIlegal;
 import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
-import Marmoleria.Roma.demo.Service.ServiceCliente;
-import Marmoleria.Roma.demo.Service.ServiceEmpleado;
-import Marmoleria.Roma.demo.Service.ServiceMateriales;
-import Marmoleria.Roma.demo.Service.ServicePedidos;
+import Marmoleria.Roma.demo.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/Pedidos")
@@ -32,13 +34,35 @@ public class ControllerPedidos {
 
     @Autowired
     private ServiceMateriales serviceMateriales;
+    @Autowired
+    private ServicePiletas servicePiletas;
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PostMapping("/Guardar")
     public ResponseEntity<String> guardarPedido(@RequestBody Pedidos pedido) {
+        // Verificamos si se seleccionó una pileta
+        if (pedido.getPileta() != null) {
+            var pileta = servicePiletas.buscarPorId(pedido.getPileta().getId());
+            if (pileta == null) {
+                return ResponseEntity.badRequest().body("Pileta no encontrada");
+            }
+
+            // Verificamos stock suficiente
+            int nuevoStock = pileta.getCantidad() - pedido.getPileta().getCantidad();
+            if (nuevoStock < 0) {
+                return ResponseEntity.badRequest().body("Stock insuficiente para la pileta seleccionada");
+            }
+
+            // Actualizamos stock
+            pileta.setCantidad(nuevoStock);
+            servicePiletas.guardarPileta(pileta);
+        }
+
+        // Guardamos el pedido
         servicePedidos.guardarPedidos(pedido);
-        return ResponseEntity.ok("Pedido guardado correctamente.");
+        return ResponseEntity.ok("Pedido guardado correctamente y stock actualizado.");
     }
+
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/Todos")
@@ -84,7 +108,7 @@ public class ControllerPedidos {
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
-    @PutMapping("/Actualizar/{id}")
+    @PutMapping("/ActualizarDatos/{id}")
     public ResponseEntity<String> actualizarPedido(@PathVariable long id, @RequestBody Pedidos pedidoActualizado) {
         return servicePedidos.pedidoSegunID(id)
                 .map(p -> {
@@ -119,7 +143,7 @@ public class ControllerPedidos {
                     p.calcularValor();
 
                     // 🔹 Guardar cambios
-                    servicePedidos.actualizarPedido(p);
+                    servicePedidos.guardarPedidos(p);
 
                     return ResponseEntity.ok("Pedido actualizado correctamente.");
                 })
@@ -147,7 +171,7 @@ public class ControllerPedidos {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/Empleado/{dni}")
     public ResponseEntity<List<Pedidos>> obtenerPorEmpleado(@PathVariable long dni) {
-        var empleado = serviceEmpleado.buscarEmpladoPorDNI(dni);
+        var empleado = serviceEmpleado.buscarEmpleadoPorDNI(dni);
         if (empleado == null)
             return ResponseEntity.notFound().build();
 
@@ -172,7 +196,7 @@ public class ControllerPedidos {
     public ResponseEntity<List<Pedidos>> obtenerPorClienteYEmpleado(@RequestParam long dniCliente, @RequestParam long dniEmpleado) {
 
         var cliente = serviceCliente.buscarClientePorDNI(dniCliente);
-        var empleado = serviceEmpleado.buscarEmpladoPorDNI(dniEmpleado);
+        var empleado = serviceEmpleado.buscarEmpleadoPorDNI(dniEmpleado);
 
         if (cliente == null || empleado == null)
             return ResponseEntity.notFound().build();
@@ -181,4 +205,20 @@ public class ControllerPedidos {
         return ResponseEntity.ok(pedidos);
     }
 
+    @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @PutMapping("/Finalizar/{id}")
+    public ResponseEntity<Map<String, String>> finalizarPedido(@PathVariable Long id) {
+
+        Pedidos pedido = servicePedidos.pedidoSegunID(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No existe ese pedido"
+                ));
+
+        servicePedidos.actualizarPedido(pedido);
+
+        Map<String, String> resp = new HashMap<>();
+        resp.put("mensaje", "Pedido finalizado correctamente");
+
+        return ResponseEntity.ok(resp);
+    }
 }

@@ -3,14 +3,18 @@ package Marmoleria.Roma.demo.Controller;
 import Marmoleria.Roma.demo.Excepciones.PiletaNoEncontrada;
 import Marmoleria.Roma.demo.Modelos.Elementos.Piletas;
 import Marmoleria.Roma.demo.Service.ServicePiletas;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -22,31 +26,49 @@ public class ControllerPiletas {
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @PostMapping("/Guardar")
-    public ResponseEntity<String> guardarPileta(@PathVariable Piletas piletas){
-        Piletas existente = servicePiletas.buscarPorId(piletas.getId());
-        if(existente != null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe esta Pileta");
+    public ResponseEntity<Map<String, String>> guardarPileta(
+            @Valid @RequestBody Piletas piletas,
+            Authentication auth,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+        System.out.println("Authentication object = " + auth);
+        System.out.println("Authorization header = " + authHeader);
+
+        // Validación opcional de duplicados (marca + modelo)
+        Optional<List<Piletas>> duplicado =
+                servicePiletas.buscarModeloYMarca(piletas.getMarca(), piletas.getModelo());
+
+        if (duplicado.isPresent() && !duplicado.get().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Ya existe una pileta con esta marca y modelo");
         }
+
         servicePiletas.guardarPileta(piletas);
-        return ResponseEntity.ok("Pileta guardado correctamente");
+
+        Map<String, String> response = new HashMap<>();
+        response.put("mensaje", "Pileta guardada correctamente");
+
+        return ResponseEntity.ok(response);
     }
 
+
+
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Modelo}")
+    @GetMapping("/BuscarModelo/{Modelo}")
     public List<Piletas> buscarPileta(@PathVariable String Modelo){
         return servicePiletas.buscarPorModelo(Modelo).orElseThrow(()-> new PiletaNoEncontrada("Este modelo no se encontro: "+Modelo));
 
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Marca}")
+    @GetMapping("/BuscarMarca/{Marca}")
     public List<Piletas> buscarPiletaPorMarca(@PathVariable String Marca){
         return servicePiletas.buscarPorMarca(Marca).orElseThrow(()->new PiletaNoEncontrada("No se encontro esta marca: "+Marca));
 
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Modelo}/{Marca}")
+    @GetMapping("/BuscarModeloyMarca/{Modelo}/{Marca}")
     public List<Piletas> buscarPorMarcaYModelo(@PathVariable String Modelo, @PathVariable String Marca){
         return servicePiletas.buscarModeloYMarca(Marca,Modelo).orElseThrow(()-> new PiletaNoEncontrada("No se encontro este modelo relacionada con la marca seleccionada"));
     }
@@ -58,6 +80,12 @@ public class ControllerPiletas {
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @GetMapping("/BuscarId/{id}")
+    public Piletas buscarPorId(@PathVariable long id){
+        return servicePiletas.buscarPorId(id);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/Eliminar/{id}")
     public ResponseEntity<String> eliminarPileta(@PathVariable long id){
         Piletas pileta = servicePiletas.buscarPorId(id);
@@ -69,27 +97,30 @@ public class ControllerPiletas {
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @PutMapping("/Modificar")
-    public ResponseEntity<String> modificarPileta(@RequestBody long id_Pileta,@PathVariable Piletas DatosActualizados){
-        return Optional.ofNullable(servicePiletas.buscarPorId(id_Pileta))
+    @PutMapping("/Modificar/{id_pileta}")
+    public ResponseEntity<Piletas> modificarPileta(@PathVariable  long id_pileta,@RequestBody Piletas DatosActualizados){
+        return Optional.ofNullable(servicePiletas.buscarPorId(id_pileta))
                 .map(pileta->{
                     pileta.setMarca(DatosActualizados.getMarca());
                     pileta.setModelo(DatosActualizados.getModelo());
                     pileta.setCantidad(DatosActualizados.getCantidad());
                     pileta.setAncho(DatosActualizados.getAncho());
                     pileta.setLargo(DatosActualizados.getLargo());
-                    return ResponseEntity.ok("Pileta modificada correctamente");
-                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pileta No Encontrada"));
+                    servicePiletas.guardarPileta(pileta);
+                    return ResponseEntity.ok(pileta);
+                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
-    @PutMapping("/Modicar/{id}")
-    public ResponseEntity<String> actualizarStock(@PathVariable int cantidad,@PathVariable long id){
+    @PutMapping("/ModificarStock/{id}/{cantidad}")
+    public ResponseEntity<String> actualizarStock(@PathVariable long id, @PathVariable int cantidad) {
         return Optional.ofNullable(servicePiletas.buscarPorId(id))
-                .map(pileta->{
+                .map(pileta -> {
                     pileta.setCantidad(cantidad);
-                    return ResponseEntity.ok("Pileta actualizada correctamente");
-                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pileta No Encontrada"));
+                    servicePiletas.guardarPileta(pileta);
+                    return ResponseEntity.ok("Stock actualizado correctamente");
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pileta no encontrada"));
     }
 
 

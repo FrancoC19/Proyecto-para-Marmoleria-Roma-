@@ -14,7 +14,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -27,7 +29,7 @@ public class ControllerCliente {
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PostMapping("/Guardar")
-    public ResponseEntity<String> guardarCliente(@RequestBody @Valid Cliente cliente) {
+    public ResponseEntity<Map<String, String>> guardarCliente(@RequestBody @Valid Cliente cliente) {
         Cliente existente = serviceCliente.buscarClientePorDNI(cliente.getDNI());
 
         if (existente != null) {
@@ -35,7 +37,9 @@ public class ControllerCliente {
         }
 
         serviceCliente.guardarCliente(cliente);
-        return ResponseEntity.ok("Cliente guardado correctamente");
+        Map<String, String> resp = new HashMap<>();
+        resp.put("mensaje", "Empleado guardado correctamente");
+        return ResponseEntity.ok(resp);
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
@@ -58,7 +62,7 @@ public class ControllerCliente {
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PutMapping("/{dni}")
-    public ResponseEntity<String> actualizarCliente(@PathVariable long dni, @RequestBody @Valid Cliente datosActualizados) {
+    public ResponseEntity<Cliente> actualizarCliente(@PathVariable long dni, @RequestBody @Valid Cliente datosActualizados) {
         return Optional.ofNullable(serviceCliente.buscarClientePorDNI(dni))
                 .map(cliente -> {
                     // Actualizamos los campos simples
@@ -76,10 +80,10 @@ public class ControllerCliente {
                     // Guardamos los cambios
                     serviceCliente.guardarCliente(cliente);
 
-                    return ResponseEntity.ok("Cliente actualizado correctamente");
+                    return ResponseEntity.ok( cliente);
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Cliente no encontrado"));
+                        .build());
     }
 
 
@@ -159,6 +163,11 @@ public class ControllerCliente {
         } else {
             return ResponseEntity.ok(resultados);
         }
+    }
+    @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @DeleteMapping("/Eliminar/{dni}")
+    public void eliminar(@PathVariable long dni) {
+        serviceCliente.eliminarCliente(dni);
     }
 
 }

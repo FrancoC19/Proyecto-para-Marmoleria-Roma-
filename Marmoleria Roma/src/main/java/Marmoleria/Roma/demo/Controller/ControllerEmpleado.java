@@ -1,5 +1,6 @@
 package Marmoleria.Roma.demo.Controller;
 import Marmoleria.Roma.demo.Excepciones.EmpleadoInexistente;
+import Marmoleria.Roma.demo.Modelos.Elementos.Materiales;
 import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
 import Marmoleria.Roma.demo.Service.ServiceEmpleado;
 import jakarta.validation.Valid;
@@ -9,7 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/Empleado")
@@ -19,15 +24,17 @@ public class ControllerEmpleado {
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
     @PostMapping("/Guardar")
-    public ResponseEntity<String> guardarUsuario(@RequestBody @Valid Empleado empleado) {
-        Empleado existente = serviceEmpleado.buscarEmpladoPorDNI(empleado.getDNI());
+    public ResponseEntity<Map<String, String>> guardarUsuario(@RequestBody @Valid Empleado empleado) {
+        Empleado existente = serviceEmpleado.buscarEmpleadoPorDNI(empleado.getDNI());
 
         if (existente != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe un empleado con ese DNI");
         }
 
         serviceEmpleado.guardarEmpleado(empleado);
-        return ResponseEntity.ok("Empleado guardado correctamente");
+        Map<String, String> resp = new HashMap<>();
+        resp.put("mensaje", "Empleado guardado correctamente");
+        return ResponseEntity.ok(resp);
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
@@ -47,7 +54,7 @@ public class ControllerEmpleado {
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @GetMapping("/ObtenerPorDNI/{DNI}")
     public ResponseEntity<Empleado> obtenerEmpleadoPorDNI(@PathVariable("DNI") long dni) {
-        Empleado empleado = serviceEmpleado.buscarEmpladoPorDNI(dni);
+        Empleado empleado = serviceEmpleado.buscarEmpleadoPorDNI(dni);
         return (empleado != null)
                 ? ResponseEntity.ok(empleado)
                 : ResponseEntity.notFound().build();
@@ -71,5 +78,20 @@ public class ControllerEmpleado {
         return (empleado != null)
                 ? ResponseEntity.ok(empleado)
                 : ResponseEntity.notFound().build();
+    }
+
+    @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @PutMapping("/Modificar/{DNI}")
+    public ResponseEntity<String> modificarMaterial(@RequestBody @Valid Empleado datosActualizados, @PathVariable Long DNI) {
+        return Optional.ofNullable(serviceEmpleado.buscarEmpleadoPorDNI(DNI))
+                .map(empleado->{
+                    empleado.setNombre(datosActualizados.getNombre());
+                    empleado.setCorreo(datosActualizados.getCorreo());
+                    empleado.setDNI(datosActualizados.getDNI());
+                    empleado.setRolesEmpleado(datosActualizados.getRolesEmpleado());
+                    serviceEmpleado.guardarEmpleado(empleado);
+                    return ResponseEntity.ok("Empleado modificado correctamente");
+                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("Empleado no encontrado"));
+
     }
 }

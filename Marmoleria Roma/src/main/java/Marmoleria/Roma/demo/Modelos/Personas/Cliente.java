@@ -1,8 +1,11 @@
 package Marmoleria.Roma.demo.Modelos.Personas;
 
 import Marmoleria.Roma.demo.Excepciones.DireccionInvalida;
+import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
 import Marmoleria.Roma.demo.Modelos.Extras.Direccion;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -24,7 +27,10 @@ public class Cliente extends Persona {
 
     @ElementCollection
     @CollectionTable(name = "cliente_direcciones", joinColumns = @JoinColumn(name = "cliente_id"))
+    @Valid
     private List<Direccion> direcciones;
+
+
 
     public Cliente(){}
 

@@ -17,7 +17,7 @@ public class ServiceEmpleado {
 
     public void guardarEmpleado(Empleado empleado) {  repoEmpleado.save(empleado); }
 
-    public Empleado buscarEmpladoPorDNI(Long dni) { return repoEmpleado.findByDNI(dni); }
+    public Empleado buscarEmpleadoPorDNI(Long dni) { return repoEmpleado.findByDNI(dni); }
 
     public Optional<List<Empleado>> ListaDeEmpleados(){return Optional.of(repoEmpleado.findAll());}
 

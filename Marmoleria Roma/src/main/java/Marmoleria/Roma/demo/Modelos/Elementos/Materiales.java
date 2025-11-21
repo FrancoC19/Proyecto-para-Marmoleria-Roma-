@@ -1,9 +1,13 @@
 package Marmoleria.Roma.demo.Modelos.Elementos;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.TipoMaterial;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 @Entity
 public class Materiales {
@@ -11,6 +15,7 @@ public class Materiales {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_material")
     @SequenceGenerator(name = "id_material", sequenceName = "id_material", allocationSize = 1)
+    @JsonProperty("id")
     private long id_materiales;
 
     @NotBlank(message = "El material debe poseer un nombre...")
@@ -23,6 +28,11 @@ public class Materiales {
     @Enumerated(EnumType.STRING)
     private TipoMaterial tipoMaterial;
 
+    // 🔹 Nueva relación con pedidos
+    @OneToMany(mappedBy = "material", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private List<Pedidos> pedidos;
+
     public Materiales() {}
 
     public Materiales(String nombreMaterial, TipoMaterial tipoMaterial, Float valorMetroCuadrado) {
@@ -31,8 +41,11 @@ public class Materiales {
         this.valorMetroCuadrado = valorMetroCuadrado;
     }
 
-    public long getId() {
+    public Long getId() {
         return id_materiales;
+    }
+    public  void setId(long id_materiales) {
+        this.id_materiales = id_materiales;
     }
 
     public String getNombreMaterial() {

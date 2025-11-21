@@ -1,17 +1,24 @@
 package Marmoleria.Roma.demo.Modelos.Elementos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
+
 
 @Entity
 public class Piletas {
 
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_pileta")
     @SequenceGenerator(name = "id_pileta", sequenceName = "id_pileta", allocationSize = 1)
+    @JsonProperty("Id")
     private Long id_pileta;
 
     @NotBlank(message = "La pileta debe poseer una marca...")
@@ -33,6 +40,9 @@ public class Piletas {
 
     @DecimalMin(value="0",message = "El valor de la pileta no pueed ser menor a 0")
     private Float valor;
+    @NotNull( message = "EL valor no puede ser negativo")
+    private int cantidad;
+
 
     @NotNull(message = "EL valor no puede ser negativo")
     public int getCantidad() {
@@ -43,13 +53,15 @@ public class Piletas {
         this.cantidad = cantidad;
     }
 
-    @NotNull( message = "EL valor no puede ser negativo")
-    private int cantidad;
+
 
     public Piletas() {}
 
     public Long getId() {
         return id_pileta;
+    }
+    public void setId(Long id) {
+        this.id_pileta = id;
     }
 
 
@@ -59,7 +71,7 @@ public class Piletas {
     }
 
     public void setMarca(@NotBlank(message = "La pileta debe poseer una marca...") String marca) {
-        marca = marca;
+        this.marca = marca;
     }
 
     public @NotBlank(message = "La pileta debe poseer un modelo...") String getModelo() {
@@ -67,7 +79,7 @@ public class Piletas {
     }
 
     public void setModelo(@NotBlank(message = "La pileta debe poseer un modelo...") String modelo) {
-        modelo = modelo;
+        this.modelo = modelo;
     }
 
     public  @DecimalMin(value = "1.0", message = "El largo no puede ser cero o negativo") Float getLargo() {
@@ -83,7 +95,7 @@ public class Piletas {
     }
 
     public void setAncho( @DecimalMin(value = "1.0", message = "EL ancho no puede ser cero o negativo") Float ancho) {
-        ancho = ancho;
+        this.ancho = ancho;
     }
 
     public @DecimalMin(value = "0", message = "El valor de la pileta no pueed ser menor a 0") Float getValor() {
