@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -63,6 +64,7 @@ public class ControllerMateriales {
                 }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado"));
 
     }
+
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @GetMapping("/Tipo/{TipoMaterial}")
     public List<Materiales> obtenerTiposMateriales(@PathVariable TipoMaterial TipoMaterial) {
@@ -76,19 +78,24 @@ public class ControllerMateriales {
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
-    @DeleteMapping("/Eliminar/{nombre}")
-    public ResponseEntity<String> eliminarMaterial(@PathVariable String nombre) {
-        Materiales material= serviceMateriales.buscarPorNombre(nombre);
-        if(material!=null) {
+    @DeleteMapping("/Eliminar/{id}")
+    public ResponseEntity<?> eliminarMaterial(@PathVariable int id) {
+
+        Materiales material = serviceMateriales.buscarPorId(id);
+
+        if (material != null) {
             serviceMateriales.eliminarMaterial(material);
+            return ResponseEntity.ok(Map.of("mensaje", "Material eliminado correctamente"));
         }
-        else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No se encuentra el material");
-        }
-        return ResponseEntity.ok("Material eliminado correctamente");
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("mensaje", "Material no encontrado"));
     }
 
-
-
+    @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
+    @GetMapping("/ObtenerporID/{id}")
+    public Materiales buscarMaterialporID(@PathVariable long id) {
+        return serviceMateriales.buscarPorId(id);
+    }
 
 }

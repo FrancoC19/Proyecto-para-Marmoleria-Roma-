@@ -84,7 +84,7 @@ public class ControllerPedidos {
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
-    @PutMapping("/Actualizar/{id}")
+    @PutMapping("/ActualizarDatos/{id}")
     public ResponseEntity<String> actualizarPedido(@PathVariable long id, @RequestBody Pedidos pedidoActualizado) {
         return servicePedidos.pedidoSegunID(id)
                 .map(p -> {
@@ -119,7 +119,7 @@ public class ControllerPedidos {
                     p.calcularValor();
 
                     // 🔹 Guardar cambios
-                    servicePedidos.actualizarPedido(p);
+                    servicePedidos.guardarPedidos(p);
 
                     return ResponseEntity.ok("Pedido actualizado correctamente.");
                 })
@@ -181,4 +181,10 @@ public class ControllerPedidos {
         return ResponseEntity.ok(pedidos);
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
+    @PutMapping ("/Finalizar")
+    public ResponseEntity<String> ActualizarEstado(@RequestBody Pedidos pedido) {
+        servicePedidos.actualizarPedido(pedido);
+        return ResponseEntity.ok("Pedido eliminado correctamente.");
+    }
 }

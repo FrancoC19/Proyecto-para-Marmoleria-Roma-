@@ -3,6 +3,7 @@ package Marmoleria.Roma.demo.Controller;
 import Marmoleria.Roma.demo.Excepciones.PiletaNoEncontrada;
 import Marmoleria.Roma.demo.Modelos.Elementos.Piletas;
 import Marmoleria.Roma.demo.Service.ServicePiletas;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class ControllerPiletas {
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @PostMapping("/Guardar")
-    public ResponseEntity<String> guardarPileta(@PathVariable Piletas piletas){
+    public ResponseEntity<String> guardarPileta(@RequestBody Piletas piletas){
         Piletas existente = servicePiletas.buscarPorId(piletas.getId());
         if(existente != null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe esta Pileta");
@@ -32,21 +33,21 @@ public class ControllerPiletas {
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Modelo}")
+    @GetMapping("/BuscarModelo/{Modelo}")
     public List<Piletas> buscarPileta(@PathVariable String Modelo){
         return servicePiletas.buscarPorModelo(Modelo).orElseThrow(()-> new PiletaNoEncontrada("Este modelo no se encontro: "+Modelo));
 
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Marca}")
+    @GetMapping("/BuscarMarca/{Marca}")
     public List<Piletas> buscarPiletaPorMarca(@PathVariable String Marca){
         return servicePiletas.buscarPorMarca(Marca).orElseThrow(()->new PiletaNoEncontrada("No se encontro esta marca: "+Marca));
 
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @GetMapping("/Buscar/{Modelo}/{Marca}")
+    @GetMapping("/BuscarModeloyMarca/{Modelo}/{Marca}")
     public List<Piletas> buscarPorMarcaYModelo(@PathVariable String Modelo, @PathVariable String Marca){
         return servicePiletas.buscarModeloYMarca(Marca,Modelo).orElseThrow(()-> new PiletaNoEncontrada("No se encontro este modelo relacionada con la marca seleccionada"));
     }

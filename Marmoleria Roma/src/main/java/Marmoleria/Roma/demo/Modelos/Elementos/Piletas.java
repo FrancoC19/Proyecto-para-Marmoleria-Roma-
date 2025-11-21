@@ -59,7 +59,7 @@ public class Piletas {
     }
 
     public void setMarca(@NotBlank(message = "La pileta debe poseer una marca...") String marca) {
-        marca = marca;
+        this.marca = marca;
     }
 
     public @NotBlank(message = "La pileta debe poseer un modelo...") String getModelo() {
@@ -83,7 +83,7 @@ public class Piletas {
     }
 
     public void setAncho( @DecimalMin(value = "1.0", message = "EL ancho no puede ser cero o negativo") Float ancho) {
-        ancho = ancho;
+        this.ancho = ancho;
     }
 
     public @DecimalMin(value = "0", message = "El valor de la pileta no pueed ser menor a 0") Float getValor() {

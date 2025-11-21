@@ -14,7 +14,7 @@ public class NotificacionController {
     @Autowired
     private NotificacionService notificacionService;
 
-    @GetMapping
+    @GetMapping("/todas")
     public List<Notificacion> getNotificaciones() {
         return notificacionService.obtenerNotificaciones();
     }

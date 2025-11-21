@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "Usuarios-Sistema")
+@Table(name = "UsuariosSistema")
 public class Usuario implements UserDetails {
 
     @Id
@@ -107,7 +107,7 @@ public class Usuario implements UserDetails {
     }
 
     public void setEmail(@Email(message = "Debe ingresar un correo válido") @NotBlank(message = "El usuario debe poseer un correo...") String email) {
-        email = email;
+        this.email = email;
     }
 
     public String getContra() {
