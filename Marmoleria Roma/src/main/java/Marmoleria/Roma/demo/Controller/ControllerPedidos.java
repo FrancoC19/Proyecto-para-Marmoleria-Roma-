@@ -1,9 +1,13 @@
 package Marmoleria.Roma.demo.Controller;
 
 import Marmoleria.Roma.demo.Excepciones.FechaIlegal;
+import Marmoleria.Roma.demo.Modelos.Elementos.Materiales;
 import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
+import Marmoleria.Roma.demo.Modelos.Elementos.Piletas;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
+import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
+import Marmoleria.Roma.demo.Modelos.dtos.PedidoDTO;
 import Marmoleria.Roma.demo.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -39,30 +43,46 @@ public class ControllerPedidos {
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PostMapping("/Guardar")
-    public ResponseEntity<String> guardarPedido(@RequestBody Pedidos pedido) {
-        // Verificamos si se seleccionó una pileta
-        if (pedido.getPileta() != null) {
-            var pileta = servicePiletas.buscarPorId(pedido.getPileta().getId());
-            if (pileta == null) {
-                return ResponseEntity.badRequest().body("Pileta no encontrada");
-            }
+    public ResponseEntity<String> guardarPedido(@RequestBody PedidoDTO dto) {
 
-            // Verificamos stock suficiente
-            int nuevoStock = pileta.getCantidad() - pedido.getPileta().getCantidad();
-            if (nuevoStock < 0) {
-                return ResponseEntity.badRequest().body("Stock insuficiente para la pileta seleccionada");
-            }
+        Cliente cliente=serviceCliente.buscarClientePorDNI(dto.clienteDni);
+        if (cliente == null) return ResponseEntity.badRequest().body("Cliente no encontrado");
 
-            // Actualizamos stock
-            pileta.setCantidad(nuevoStock);
-            servicePiletas.guardarPileta(pileta);
-        }
+        Empleado empleado=serviceEmpleado.buscarEmpleadoPorDNI(dto.empleadoDni);
+        if (empleado == null) return ResponseEntity.badRequest().body("Empleado no encontrado");
 
+        Piletas pileta=servicePiletas.buscarPorId(dto.piletaId);
+        if (pileta == null) return ResponseEntity.badRequest().body("Pileta no encontrado");
+
+        int nuevoStock = pileta.getCantidad() - 1;
+        if (nuevoStock < 0) return ResponseEntity.badRequest().body("Stock insuficiente para la pileta seleccionada");
+
+        pileta.setCantidad(nuevoStock);
+        servicePiletas.guardarPileta(pileta);
+
+        Materiales material=serviceMateriales.buscarPorId(dto.materialId);
+        if (material == null) return ResponseEntity.badRequest().body("Material no encontrado");
+
+        Pedidos pedido = new Pedidos(cliente,empleado, dto.descuento, dto.fechaEmision, dto.fechaEntrega, dto.griferia, material, dto.metrosCuadrados, dto.moldura, dto.observaciones, pileta, dto.senia, dto.direccion);
         // Guardamos el pedido
+        pedido.calcularValor();
         servicePedidos.guardarPedidos(pedido);
         return ResponseEntity.ok("Pedido guardado correctamente y stock actualizado.");
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
+    @GetMapping("/PendientesAterminar")
+    public ResponseEntity<List<Pedidos>> obtenerPedidosaTerminar() {
+        List<Pedidos> pedidos = servicePedidos.PedidosPendienteYEnProceso().orElse(List.of());
+        return ResponseEntity.ok(pedidos);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
+    @GetMapping("/PedidosTerminados")
+    public ResponseEntity<List<Pedidos>> obtenerPedidosTerminado() {
+        List<Pedidos> pedidos = servicePedidos.PedidosTerminados().orElse(List.of());
+        return ResponseEntity.ok(pedidos);
+    }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/Todos")
@@ -109,40 +129,40 @@ public class ControllerPedidos {
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PutMapping("/ActualizarDatos/{id}")
-    public ResponseEntity<String> actualizarPedido(@PathVariable long id, @RequestBody Pedidos pedidoActualizado) {
+    public ResponseEntity<String> actualizarPedido(@PathVariable long id, @RequestBody PedidoDTO dto) {
         return servicePedidos.pedidoSegunID(id)
                 .map(p -> {
                     // 🔹 Campos básicos
-                    p.setObservaciones(pedidoActualizado.getObservaciones());
-                    p.setSenia(pedidoActualizado.getSenia());
-                    p.setGriferia(pedidoActualizado.getGriferia());
-                    p.setMoldura(pedidoActualizado.getMoldura());
-                    p.setFechaEntrega(pedidoActualizado.getFechaEntrega());
-                    p.setFechaEmision(pedidoActualizado.getFechaEmision());
-                    p.setMetrosCuadrados(pedidoActualizado.getMetrosCuadrados());
-                    p.setDescuento(pedidoActualizado.getDescuento());
-                    p.setEstado(pedidoActualizado.getEstado());
+                    p.setObservaciones(dto.observaciones);
+                    p.setSenia(dto.senia);
+                    p.setGriferia(dto.griferia);
+                    p.setMoldura(dto.moldura);
+                    p.setFechaEntrega(dto.fechaEntrega);
+                    p.setMetrosCuadrados(dto.metrosCuadrados);
+                    p.setDescuento(dto.descuento);
 
-                    // 🔹 Relaciones (si vienen actualizadas en el JSON)
-                    if (pedidoActualizado.getCliente() != null)
-                        p.setCliente(pedidoActualizado.getCliente());
+                    Cliente cliente = serviceCliente.buscarClientePorDNI(dto.clienteDni);
+                    if (cliente == null) return ResponseEntity.badRequest().body("Cliente no encontrado");
 
-                    if (pedidoActualizado.getEmpleado() != null)
-                        p.setEmpleado(pedidoActualizado.getEmpleado());
+                    Empleado empleado = serviceEmpleado.buscarEmpleadoPorDNI(dto.empleadoDni);
+                    if (empleado == null) return ResponseEntity.badRequest().body("Empleado no encontrado");
 
-                    if (pedidoActualizado.getMaterial() != null)
-                        p.setMaterial(pedidoActualizado.getMaterial());
+                    Materiales material = serviceMateriales.buscarPorId(dto.materialId);
+                    if (material == null) return ResponseEntity.badRequest().body("Material no encontrado");
 
-                    if (pedidoActualizado.getPileta() != null)
-                        p.setPileta(pedidoActualizado.getPileta());
+                    Piletas pileta = servicePiletas.buscarPorId(dto.piletaId);
+                    if (pileta == null) return ResponseEntity.badRequest().body("Pileta no encontrada");
 
-                    if (pedidoActualizado.getDireccion() != null)
-                        p.setDireccion(pedidoActualizado.getDireccion());
+                    Piletas piletaAReingresar= servicePiletas.buscarPorId(p.getPileta().getId());
+                    piletaAReingresar.setCantidad(pileta.getCantidad()+1);
+                    servicePiletas.guardarPileta(piletaAReingresar);
 
-                    // 🔹 Recalcular valor total del pedido
+                    p.setCliente(cliente);
+                    p.setEmpleado(empleado);
+                    p.setMaterial(material);
+                    p.setPileta(pileta);
+
                     p.calcularValor();
-
-                    // 🔹 Guardar cambios
                     servicePedidos.guardarPedidos(p);
 
                     return ResponseEntity.ok("Pedido actualizado correctamente.");

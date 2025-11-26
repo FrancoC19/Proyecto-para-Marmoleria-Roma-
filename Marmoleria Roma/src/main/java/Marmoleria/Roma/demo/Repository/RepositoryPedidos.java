@@ -2,6 +2,7 @@ package Marmoleria.Roma.demo.Repository;
 
 import Marmoleria.Roma.demo.Modelos.Elementos.Materiales;
 import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
+import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,4 +25,6 @@ public interface RepositoryPedidos extends JpaRepository<Pedidos, Long> {
     List<Pedidos> findByEstado(String estado);
 
     List<Pedidos> findByFechaEntregaBetween(LocalDate fechaInicio, LocalDate fechaFin);
+
+    List<Pedidos> findByEstadoNot(String estado);
 }

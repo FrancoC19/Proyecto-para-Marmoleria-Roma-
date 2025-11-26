@@ -5,6 +5,7 @@ import Marmoleria.Roma.demo.Modelos.Elementos.Materiales;
 import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
 import Marmoleria.Roma.demo.Modelos.Elementos.Piletas;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
+import Marmoleria.Roma.demo.Modelos.Extras.Notificacion;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
 import Marmoleria.Roma.demo.Repository.RepositoryPedidos;
@@ -12,9 +13,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,12 +29,17 @@ public class ServicePedidos {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    @Lazy
+    private NotificacionService notificacionService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
 
     @Transactional
-    public Pedidos guardarPedidos(Pedidos pedido) {
+    public void guardarPedidos(Pedidos pedido) {
         // Validar y buscar Cliente
         if (pedido.getCliente() == null || pedido.getCliente().getDNI() == null) {
             throw new IllegalArgumentException("El ID del cliente es obligatorio");
@@ -73,13 +81,23 @@ public class ServicePedidos {
         pedido.setPileta(piletaPersistida);
 
         // Guardar Pedido
-        return repositoryPedidos.save(pedido);
+        repositoryPedidos.save(pedido);
+
+        notificacionService.notificacarPorLlamada();
     }
 
 
 
     public Optional<List<Pedidos>> todosLosPedidos() {
         return Optional.of(repositoryPedidos.findAll());
+    }
+
+    public Optional<List<Pedidos>> PedidosPendienteYEnProceso() {
+        return Optional.of(repositoryPedidos.findByEstadoNot(EstadoPedido.ENTREGADO.toString()));
+    }
+
+    public Optional<List<Pedidos>> PedidosTerminados() {
+        return Optional.of(repositoryPedidos.findByEstado(EstadoPedido.ENTREGADO.toString()));
     }
 
     public Optional<List<Pedidos>> pedidosSegunEstado(EstadoPedido estado) {
@@ -131,6 +149,7 @@ public class ServicePedidos {
         }
 
         repositoryPedidos.save(pedido);
+        notificacionService.notificacarPorLlamada();
     }
 
     public Optional<List<Pedidos>> pedidosProximosAVencer(int dias) {
@@ -140,6 +159,7 @@ public class ServicePedidos {
         List<Pedidos> pedidos = repositoryPedidos.findAll()
                 .stream()
                 .filter(p ->
+                        //Parseo la fecha de string a local date
                         // Fecha dentro del rango
                         !p.getFechaEntrega().isBefore(hoy) &&
                                 !p.getFechaEntrega().isAfter(limite) &&

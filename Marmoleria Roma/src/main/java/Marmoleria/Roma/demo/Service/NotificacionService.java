@@ -2,6 +2,8 @@ package Marmoleria.Roma.demo.Service;
 
 import Marmoleria.Roma.demo.Modelos.Extras.Notificacion;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -17,9 +19,22 @@ public class NotificacionService {
 
     private final List<Notificacion> notificaciones = new ArrayList<>();
 
-    @Scheduled(cron = "0 0 9,15 * * *", initialDelay = 0)
-    public void notificarPedidosProximos() {
-        notificaciones.clear(); // 🧹 limpia notificaciones anteriores
+    @Scheduled(cron = "0 0 9,15 * * *")
+    public void notificarPedidosProximosProgramado() {
+        generarNotificaciones();
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void notificarAlIniciar() {
+        generarNotificaciones();
+    }
+
+    public void notificacarPorLlamada(){
+        generarNotificaciones();
+    }
+
+    private void generarNotificaciones() {
+        notificaciones.clear(); // 🧹 limpia las notificaciones previas
 
         servicePedidos.pedidosProximosAVencer(3).ifPresent(pedidos -> {
             pedidos.forEach(p -> {

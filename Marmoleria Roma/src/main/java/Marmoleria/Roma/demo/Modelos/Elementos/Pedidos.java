@@ -98,7 +98,7 @@ public class Pedidos {
 
     // Constructor de conveniencia
     public Pedidos(
-            Cliente cliente, Float descuento, LocalDate fechaEmision,
+            Cliente cliente,Empleado empleado, Float descuento, LocalDate fechaEmision,
             LocalDate fechaEntrega, String griferia, Materiales material,
             Float metrosCuadrados, String moldura, String observaciones,
             Piletas pileta, Integer senia, Direccion direccion) {
@@ -115,6 +115,7 @@ public class Pedidos {
         this.pileta = pileta;
         this.senia = senia;
         this.direccion = direccion;
+        this.empleado = empleado;
         calcularValor();
     }
 
