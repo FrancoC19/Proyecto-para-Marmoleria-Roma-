@@ -101,7 +101,8 @@ public class ServicePedidos {
     }
 
     public Optional<List<Pedidos>> pedidosSegunEstado(EstadoPedido estado) {
-        return Optional.of(repositoryPedidos.findByEstado(estado.toString()));
+        List<Pedidos> retornar=repositoryPedidos.findByEstado(estado.toString()).stream().filter(p->!p.getEstado().equalsIgnoreCase(EstadoPedido.ENTREGADO.toString())).toList();
+        return Optional.of(retornar);
     }
 
     public void eliminarPedido(long idPedido) {
@@ -109,19 +110,35 @@ public class ServicePedidos {
     }
 
     public Optional<List<Pedidos>> pedidosSegunMaterial(Materiales materiales) {
-        return Optional.of(repositoryPedidos.findByMaterial(materiales));
+        List<Pedidos> retornar = repositoryPedidos.findByMaterial(materiales)
+                .stream()
+                .filter(p -> !p.getEstado().equalsIgnoreCase(EstadoPedido.ENTREGADO.toString()))
+                .toList();
+        return Optional.of(retornar);
     }
 
     public Optional<List<Pedidos>> pedidosSegunEmpleado(Empleado empleado) {
-        return Optional.of(repositoryPedidos.findByEmpleado(empleado));
+        List<Pedidos> retornar = repositoryPedidos.findByEmpleado(empleado)
+                .stream()
+                .filter(p -> !p.getEstado().equalsIgnoreCase(EstadoPedido.ENTREGADO.toString()))
+                .toList();
+        return Optional.of(retornar);
     }
 
     public Optional<List<Pedidos>> pedidosSegunClienteyEmpleado(Cliente cliente, Empleado empleado) {
-        return Optional.of(repositoryPedidos.findByClienteAndEmpleado(cliente, empleado));
+        List<Pedidos> retornar = repositoryPedidos.findByClienteAndEmpleado(cliente, empleado)
+                .stream()
+                .filter(p -> !p.getEstado().equalsIgnoreCase(EstadoPedido.ENTREGADO.toString()))
+                .toList();
+        return Optional.of(retornar);
     }
 
     public Optional<List<Pedidos>> pedidosSegunCliente(Cliente cliente) {
-        return Optional.of(repositoryPedidos.findByCliente(cliente));
+        List<Pedidos> retornar = repositoryPedidos.findByCliente(cliente)
+                .stream()
+                .filter(p -> !p.getEstado().equalsIgnoreCase(EstadoPedido.ENTREGADO.toString()))
+                .toList();
+        return Optional.of(retornar);
     }
 
     public Optional<Pedidos> pedidoSegunID(long idPedido) {
@@ -135,7 +152,8 @@ public class ServicePedidos {
         if (inicio.isAfter(fin)) {
             throw new FechaIlegal("La fecha de inicio debe ser anterior a la fecha final");
         }
-        return Optional.of(repositoryPedidos.findByFechaEntregaBetween(inicio, fin));
+        List<Pedidos> retornar= repositoryPedidos.findByFechaEntregaBetween(inicio, fin).stream().filter(p->!p.getEstado().equalsIgnoreCase(EstadoPedido.ENTREGADO.toString())).toList();
+        return Optional.of(retornar);
     }
 
     public void actualizarPedido(Pedidos pedido) {
