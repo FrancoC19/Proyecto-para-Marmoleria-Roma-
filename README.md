@@ -1,4 +1,3 @@
-asi estaria bien?
 
 # Marmolería Roma - Sistema de Gestión
 
