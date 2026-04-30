@@ -28,7 +28,6 @@ public class Materiales {
     @Enumerated(EnumType.STRING)
     private TipoMaterial tipoMaterial;
 
-    // 🔹 Nueva relación con pedidos
     @OneToMany(mappedBy = "material", cascade = CascadeType.REMOVE)
     @JsonIgnore
     private List<Pedidos> pedidos;

@@ -34,7 +34,7 @@ public class NotificacionService {
     }
 
     private void generarNotificaciones() {
-        notificaciones.clear(); // 🧹 limpia las notificaciones previas
+        notificaciones.clear();
 
         servicePedidos.pedidosProximosAVencer(3).ifPresent(pedidos -> {
             pedidos.forEach(p -> {

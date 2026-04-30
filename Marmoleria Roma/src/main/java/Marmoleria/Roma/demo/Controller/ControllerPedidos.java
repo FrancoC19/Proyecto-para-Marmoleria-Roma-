@@ -154,8 +154,12 @@ public class ControllerPedidos {
                     if (pileta == null) return ResponseEntity.badRequest().body("Pileta no encontrada");
 
                     Piletas piletaAReingresar= servicePiletas.buscarPorId(p.getPileta().getId());
-                    piletaAReingresar.setCantidad(pileta.getCantidad()+1);
+                    piletaAReingresar.setCantidad(piletaAReingresar.getCantidad()+1);
                     servicePiletas.guardarPileta(piletaAReingresar);
+
+                    Piletas piletaArestar= servicePiletas.buscarPorId(dto.piletaId);
+                    piletaArestar.setCantidad(piletaArestar.getCantidad()-1);
+                    servicePiletas.guardarPileta(piletaArestar);
 
                     p.setCliente(cliente);
                     p.setEmpleado(empleado);
