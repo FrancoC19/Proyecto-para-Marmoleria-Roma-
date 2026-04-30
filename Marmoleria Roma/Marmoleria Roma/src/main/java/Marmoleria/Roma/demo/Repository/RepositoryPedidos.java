@@ -27,6 +27,4 @@ public interface RepositoryPedidos extends JpaRepository<Pedidos, Long> {
     List<Pedidos> findByFechaEntregaBetween(LocalDate fechaInicio, LocalDate fechaFin);
 
     List<Pedidos> findByEstadoNot(String estado);
-    List<Pedidos> findByFechaEmisionBetween(LocalDate fechaInicio, LocalDate fechaFin);
-
 }
