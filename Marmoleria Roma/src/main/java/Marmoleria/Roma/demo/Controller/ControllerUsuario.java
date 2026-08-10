@@ -64,7 +64,7 @@ public class ControllerUsuario {
                 .map(usuario->{
                     usuario.setEmail(DatosActualizados.getEmail());
                     usuario.setTipoUsuario(DatosActualizados.getTipoUsuario());
-                    serviceUsuario.guardarUsuario(usuario);
+                    serviceUsuario.actualizarUsuario(usuario);
                     return ResponseEntity.ok("Usuario modificado correctamente");
                 }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontro el usuario"));
 

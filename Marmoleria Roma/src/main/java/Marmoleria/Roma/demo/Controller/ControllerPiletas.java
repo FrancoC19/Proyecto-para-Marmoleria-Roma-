@@ -106,7 +106,7 @@ public class ControllerPiletas {
                     pileta.setCantidad(DatosActualizados.getCantidad());
                     pileta.setAncho(DatosActualizados.getAncho());
                     pileta.setLargo(DatosActualizados.getLargo());
-                    servicePiletas.guardarPileta(pileta);
+                    servicePiletas.modificarPileta(pileta);
                     return ResponseEntity.ok(pileta);
                 }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
@@ -117,7 +117,7 @@ public class ControllerPiletas {
         return Optional.ofNullable(servicePiletas.buscarPorId(id))
                 .map(pileta -> {
                     pileta.setCantidad(cantidad);
-                    servicePiletas.guardarPileta(pileta);
+                    servicePiletas.modificarPileta(pileta);
                     return ResponseEntity.ok("Stock actualizado correctamente");
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pileta no encontrada"));

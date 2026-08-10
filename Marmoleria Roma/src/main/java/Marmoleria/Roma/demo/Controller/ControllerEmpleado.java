@@ -89,7 +89,7 @@ public class ControllerEmpleado {
                     empleado.setCorreo(datosActualizados.getCorreo());
                     empleado.setDNI(datosActualizados.getDNI());
                     empleado.setRolesEmpleado(datosActualizados.getRolesEmpleado());
-                    serviceEmpleado.guardarEmpleado(empleado);
+                    serviceEmpleado.actualizarEmpleado(empleado);
                     return ResponseEntity.ok("Empleado modificado correctamente");
                 }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).body("Empleado no encontrado"));
 

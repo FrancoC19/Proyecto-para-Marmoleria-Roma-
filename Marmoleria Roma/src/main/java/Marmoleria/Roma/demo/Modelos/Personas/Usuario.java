@@ -21,6 +21,9 @@ public class Usuario implements UserDetails {
     @SequenceGenerator(name = "id_Usuario", sequenceName = "id_Usuario", allocationSize = 1)
     private Long id;
 
+    @Version
+    private Long version;
+
     @NotNull(message = "El empleado debe poseer un rol...")
     @Enumerated(EnumType.STRING)
     private TipoUsuario tipoUsuario;

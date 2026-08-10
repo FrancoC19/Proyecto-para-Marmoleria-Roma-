@@ -2,8 +2,12 @@ package Marmoleria.Roma.demo.Service;
 
 import Marmoleria.Roma.demo.Modelos.Elementos.Piletas;
 import Marmoleria.Roma.demo.Repository.RepositoryPiletas;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,5 +32,17 @@ public class ServicePiletas {
     public Optional<List<Piletas>> todasLasPiletas (){ return Optional.of(repoPiletas.findAll());}
 
     public void eliminarPileta (Piletas pileta){repoPiletas.delete(pileta);}
+
+    @Transactional
+    public void modificarPileta(Piletas piletas){
+        try{
+            repoPiletas.saveAndFlush(piletas);
+        }catch (OptimisticLockingFailureException e){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "La pileta fue modificado por otro usuario"
+            );
+        }
+    }
 
 }
