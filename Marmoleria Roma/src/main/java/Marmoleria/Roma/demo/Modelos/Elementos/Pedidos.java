@@ -19,18 +19,12 @@ public class Pedidos {
     @SequenceGenerator(name = "id_pedido", sequenceName = "id_pedido", allocationSize = 1)
     private Long idPedido;
 
+    @Version
+    private Long version;
+
     // Texto libre opcional con observaciones sobre el pedido
     private String observaciones;
 
-    /**
-     * RELACIÓN con Cliente:
-     * Muchos pedidos (Many) pueden pertenecer a un solo cliente (One).
-     * En la BD esto genera una columna "id_cliente" como clave foránea.
-     * En Java permite acceder al objeto Cliente completo desde un Pedido.
-     *
-     * ⚠️ Aunque en el JSON de entrada mandes solo { "id": 1 },
-     * JPA usará ese id para vincular el cliente existente.
-     */
     @ManyToOne
     @JoinColumn(name = "id_cliente", nullable = false)
     @NotNull(message = "El pedido debe tener un cliente")
@@ -45,21 +39,12 @@ public class Pedidos {
     @Min(value = 0, message = "La seña no puede ser menor a 0")
     private Integer senia;
 
-    /**
-     * RELACIÓN con Materiales:
-     * Muchos pedidos pueden usar un mismo material.
-     * Genera una columna "id_material" como foreign key en la tabla pedidos.
-     */
+
     @ManyToOne
     @JoinColumn(name = "id_material", nullable = false)
     @NotNull(message = "El pedido debe tener un material")
     private Materiales material;
 
-    /**
-     * RELACIÓN con Piletas:
-     * Muchos pedidos pueden tener la misma pileta asociada.
-     * También crea una foreign key "id_pileta".
-     */
     @ManyToOne
     @JoinColumn(name = "id_pileta", nullable = false)
     private Piletas pileta;

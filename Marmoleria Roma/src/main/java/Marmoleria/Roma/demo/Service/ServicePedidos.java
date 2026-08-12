@@ -14,7 +14,10 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -86,6 +89,19 @@ public class ServicePedidos {
         notificacionService.notificacarPorLlamada();
     }
 
+    @Transactional
+    public void actualizarPedidos(Pedidos pedido) {
+        try {
+            repositoryPedidos.saveAndFlush(pedido);
+        } catch (OptimisticLockingFailureException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "El pedido fue modificado por otro usuario"
+            );
+        }
+
+        notificacionService.notificacarPorLlamada();
+    }
 
 
     public Optional<List<Pedidos>> todosLosPedidos() {
@@ -156,18 +172,25 @@ public class ServicePedidos {
         return Optional.of(retornar);
     }
 
-    public void actualizarPedido(Pedidos pedido) {
+    @Transactional
+    public void actualizarEstadoPedido(Pedidos pedido) {
         String estadoActual = pedido.getEstado();
+        try {
+            if (estadoActual.equalsIgnoreCase(EstadoPedido.EN_PROCESO.toString())) {
+                pedido.setEstado(EstadoPedido.PENDIENTE_DE_ENTREGA.toString());
+                emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
+            } else if (estadoActual.equalsIgnoreCase(EstadoPedido.PENDIENTE_DE_ENTREGA.toString())) {
+                pedido.setEstado(EstadoPedido.ENTREGADO.toString());
+            }
 
-        if (estadoActual.equalsIgnoreCase(EstadoPedido.EN_PROCESO.toString())) {
-            pedido.setEstado(EstadoPedido.PENDIENTE_DE_ENTREGA.toString());
-            emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
-        } else if (estadoActual.equalsIgnoreCase(EstadoPedido.PENDIENTE_DE_ENTREGA.toString())) {
-            pedido.setEstado(EstadoPedido.ENTREGADO.toString());
+                repositoryPedidos.saveAndFlush(pedido);
+                notificacionService.notificacarPorLlamada();
+        }catch(OptimisticLockingFailureException e){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "El pedido fue modificado por otro usuario"
+            );
         }
-
-        repositoryPedidos.save(pedido);
-        notificacionService.notificacarPorLlamada();
     }
 
     public Optional<List<Pedidos>> pedidosProximosAVencer(int dias) {

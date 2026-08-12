@@ -4,8 +4,12 @@ import Marmoleria.Roma.demo.Excepciones.IdNoEncontrado;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.TipoUsuario;
 import Marmoleria.Roma.demo.Modelos.Personas.Usuario;
 import Marmoleria.Roma.demo.Repository.RepositoryUsuario;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,4 +32,16 @@ public class ServiceUsuario {
     public Optional<List<Usuario>> todosLosUsuarios(){return Optional.of(repoUsuario.findAll());}
 
     public void eliminarUsuario(Usuario usuario) {repoUsuario.delete(usuario);}
+
+    @Transactional
+    public void actualizarUsuario(Usuario usuario) {
+        try{
+            repoUsuario.saveAndFlush(usuario);
+        }catch (OptimisticLockingFailureException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "El usuario fue modificado por otro Administrador"
+            );
+        }
+    }
 }

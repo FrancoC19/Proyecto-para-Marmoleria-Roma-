@@ -18,6 +18,9 @@ public class Materiales {
     @JsonProperty("id")
     private long id_materiales;
 
+    @Version
+    private Long version;
+
     @NotBlank(message = "El material debe poseer un nombre...")
     private String nombreMaterial;
 
@@ -28,7 +31,6 @@ public class Materiales {
     @Enumerated(EnumType.STRING)
     private TipoMaterial tipoMaterial;
 
-    // 🔹 Nueva relación con pedidos
     @OneToMany(mappedBy = "material", cascade = CascadeType.REMOVE)
     @JsonIgnore
     private List<Pedidos> pedidos;

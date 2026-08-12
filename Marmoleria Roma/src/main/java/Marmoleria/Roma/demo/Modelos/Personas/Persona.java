@@ -12,6 +12,9 @@ public abstract class Persona {
     @JsonProperty("dni")
     protected Long DNI;
 
+    @Version
+    private Long version;
+
     @NotBlank(message="El Cliente debe poseer un correo...")
     protected String correo;
 
