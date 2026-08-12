@@ -58,7 +58,7 @@ public class ControllerPedidos {
         if (nuevoStock < 0) return ResponseEntity.badRequest().body("Stock insuficiente para la pileta seleccionada");
 
         pileta.setCantidad(nuevoStock);
-        servicePiletas.guardarPileta(pileta);
+        servicePiletas.modificarPileta(pileta);
 
         Materiales material=serviceMateriales.buscarPorId(dto.materialId);
         if (material == null) return ResponseEntity.badRequest().body("Material no encontrado");
@@ -155,11 +155,11 @@ public class ControllerPedidos {
 
                     Piletas piletaAReingresar= servicePiletas.buscarPorId(p.getPileta().getId());
                     piletaAReingresar.setCantidad(piletaAReingresar.getCantidad()+1);
-                    servicePiletas.guardarPileta(piletaAReingresar);
+                    servicePiletas.modificarPileta(piletaAReingresar);
 
                     Piletas piletaArestar= servicePiletas.buscarPorId(dto.piletaId);
                     piletaArestar.setCantidad(piletaArestar.getCantidad()-1);
-                    servicePiletas.guardarPileta(piletaArestar);
+                    servicePiletas.modificarPileta(piletaArestar);
 
                     p.setCliente(cliente);
                     p.setEmpleado(empleado);
@@ -167,7 +167,7 @@ public class ControllerPedidos {
                     p.setPileta(pileta);
 
                     p.calcularValor();
-                    servicePedidos.guardarPedidos(p);
+                    servicePedidos.actualizarPedidos(p);
 
                     return ResponseEntity.ok("Pedido actualizado correctamente.");
                 })
@@ -238,7 +238,7 @@ public class ControllerPedidos {
                         HttpStatus.NOT_FOUND, "No existe ese pedido"
                 ));
 
-        servicePedidos.actualizarPedido(pedido);
+        servicePedidos.actualizarEstadoPedido(pedido);
 
         Map<String, String> resp = new HashMap<>();
         resp.put("mensaje", "Pedido finalizado correctamente");

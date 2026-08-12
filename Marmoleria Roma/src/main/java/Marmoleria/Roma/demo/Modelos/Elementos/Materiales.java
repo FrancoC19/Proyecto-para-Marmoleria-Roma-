@@ -18,6 +18,9 @@ public class Materiales {
     @JsonProperty("id")
     private long id_materiales;
 
+    @Version
+    private Long version;
+
     @NotBlank(message = "El material debe poseer un nombre...")
     private String nombreMaterial;
 

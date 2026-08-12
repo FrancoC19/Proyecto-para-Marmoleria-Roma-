@@ -21,6 +21,9 @@ public class Piletas {
     @JsonProperty("Id")
     private Long id_pileta;
 
+    @Version
+    private Long version;
+
     @NotBlank(message = "La pileta debe poseer una marca...")
     private String marca;
 

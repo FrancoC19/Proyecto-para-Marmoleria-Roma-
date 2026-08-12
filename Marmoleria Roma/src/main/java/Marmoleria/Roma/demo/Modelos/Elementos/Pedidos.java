@@ -19,6 +19,9 @@ public class Pedidos {
     @SequenceGenerator(name = "id_pedido", sequenceName = "id_pedido", allocationSize = 1)
     private Long idPedido;
 
+    @Version
+    private Long version;
+
     // Texto libre opcional con observaciones sobre el pedido
     private String observaciones;
 

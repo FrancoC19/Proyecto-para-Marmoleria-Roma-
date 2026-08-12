@@ -75,7 +75,7 @@ public class ControllerMateriales {
                     material.setNombreMaterial(datosActualizados.getNombreMaterial());
                     material.setTipoMaterial(datosActualizados.getTipoMaterial());
                     material.setValorMetroCuadrado(datosActualizados.getValorMetroCuadrado());
-                    serviceMateriales.guardarMaterial(material);
+                    serviceMateriales.actualizarMaterial(material);
                     return ResponseEntity.ok(material);
                 }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 

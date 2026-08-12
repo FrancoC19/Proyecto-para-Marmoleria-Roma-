@@ -73,12 +73,12 @@ public class ControllerCliente {
 
                     // ✅ Actualizamos la lista de direcciones (si se envía)
                     if (datosActualizados.getDirecciones() != null) {
-                        cliente.getDirecciones().clear();
-                        cliente.getDirecciones().addAll(datosActualizados.getDirecciones());
-                    }
+                        datosActualizados.getDirecciones().stream()
+                                .filter(nuevaDir -> !cliente.getDirecciones().contains(nuevaDir))
+                                .forEach(cliente.getDirecciones()::add);                    }
 
                     // Guardamos los cambios
-                    serviceCliente.guardarCliente(cliente);
+                    serviceCliente.actualalizarCliente(cliente);
 
                     return ResponseEntity.ok( cliente);
                 })
