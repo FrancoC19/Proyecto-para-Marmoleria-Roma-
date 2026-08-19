@@ -29,6 +29,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+        System.out.println("ENTRE AL JWT FILTER: "
+                + request.getMethod()
+                + " "
+                + request.getRequestURI());
+
         // Obtenemos el header "Authorization" del request
         final String authHeader = request.getHeader("Authorization");
 
@@ -65,6 +70,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
+
 
                 // Establecemos el usuario autenticado en el contexto de Spring
                 SecurityContextHolder.getContext().setAuthentication(authToken);
