@@ -7,6 +7,7 @@ import Marmoleria.Roma.demo.Service.ServiceImagen;
 import Marmoleria.Roma.demo.Service.ServicePedidos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +40,7 @@ public class ControllerImagen {
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
-    @PostMapping(value = "/Agregar/{idPedido}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping( "/Agregar/{idPedido}")
     public void agregarImagen(@PathVariable Long idPedido, @RequestBody String base64) throws IOException {
         Pedidos pedido = servicePedidos.pedidoSegunID(idPedido).orElseThrow(() -> new PedidoNoEncontrado("El ID del pedido no está registrado"));
 
@@ -47,7 +48,7 @@ public class ControllerImagen {
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
-    @PutMapping(value = "/Actualizar/{idPedido}/{numero}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/Actualizar/{idPedido}/{numero}")
     public void actualizarImagen(@PathVariable Long idPedido, @PathVariable int numero, @RequestBody String base64) throws IOException {
         Pedidos pedido = servicePedidos.pedidoSegunID(idPedido).orElseThrow(() -> new PedidoNoEncontrado("El ID del pedido no está registrado"));
 

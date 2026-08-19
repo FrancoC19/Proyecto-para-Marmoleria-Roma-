@@ -22,26 +22,35 @@ public class ServiceImagen {
     @Autowired
     private RepositoryImagen repositoryImagen;
 
-    public void guardarImagen(String base64,Pedidos pedido) {
+    public void guardarImagen(String base64, Pedidos pedido) {
 
         byte[] imagenBytes = convertirBase64(base64);
 
-        for (int i=0;i<=3;i++) {
+        for (int i = 0; i <= 3; i++) {
+
             try {
                 Imagen imagen = new Imagen();
 
                 imagen.setPedido(pedido);
                 imagen.setImagen(imagenBytes);
 
-                imagen.setNumeroDeImagenDelPedido(
-                        repositoryImagen.countByPedido(pedido) + 1
-                );
+                int numero = repositoryImagen.countByPedido(pedido) + 1;
+
+                imagen.setNumeroDeImagenDelPedido(numero);
 
                 repositoryImagen.saveAndFlush(imagen);
 
                 return;
+
             } catch (DataIntegrityViolationException e) {
 
+                System.out.println(
+                        "⚠️ CONFLICTO EN INTENTO " + (i + 1)
+                );
+
+                System.out.println(
+                        "⚠️ MENSAJE: " + e.getMessage()
+                );
             }
         }
 
@@ -92,6 +101,7 @@ public class ServiceImagen {
     }
 
     private byte[] convertirBase64(String base64) {
+
         if (base64 == null || base64.isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -101,14 +111,18 @@ public class ServiceImagen {
 
         try {
 
-            // Si viene como: data:image/png;base64,iVBORw0KGgo...
             if (base64.contains(",")) {
                 base64 = base64.substring(base64.indexOf(",") + 1);
             }
 
+            // IMPORTANTE: eliminar comillas si vienen desde Postman
+            base64 = base64.replace("\"", "").trim();
+
             return Base64.getDecoder().decode(base64);
 
         } catch (IllegalArgumentException e) {
+
+            System.out.println("ERROR DECODIFICANDO BASE64: " + e.getMessage());
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
