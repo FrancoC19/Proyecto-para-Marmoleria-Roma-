@@ -3,6 +3,7 @@ package Marmoleria.Roma.demo.Controller;
 import Marmoleria.Roma.demo.Excepciones.PedidoNoEncontrado;
 import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
 import Marmoleria.Roma.demo.Modelos.Extras.Imagen;
+import Marmoleria.Roma.demo.Modelos.dtos.ImagenDTO;
 import Marmoleria.Roma.demo.Service.ServiceImagen;
 import Marmoleria.Roma.demo.Service.ServicePedidos;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +28,14 @@ public class ControllerImagen {
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/TodasDePedido/{idPedido}")
-    public List<Imagen> obtenerTodasPedido(@PathVariable long idPedido){
+    public List<ImagenDTO> obtenerTodasPedido(@PathVariable long idPedido){
         Pedidos pedido=servicePedidos.pedidoSegunID(idPedido).orElseThrow(()->new PedidoNoEncontrado("El ID del pedido no esta registrado"));
         return serviceImagen.obtenerImagenesDePedido(pedido);
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/DePedido/{idPedido}/{numero}")
-    public Imagen obtenerImagen(@PathVariable Long idPedido, @PathVariable int numero) {
+    public ImagenDTO obtenerImagen(@PathVariable Long idPedido, @PathVariable int numero) {
         Pedidos pedido = servicePedidos.pedidoSegunID(idPedido).orElseThrow(() -> new PedidoNoEncontrado("El ID del pedido no está registrado"));
         return serviceImagen.obtenerImagenDePedido(pedido, numero);
     }
@@ -52,7 +53,7 @@ public class ControllerImagen {
     public void actualizarImagen(@PathVariable Long idPedido, @PathVariable int numero, @RequestBody String base64) throws IOException {
         Pedidos pedido = servicePedidos.pedidoSegunID(idPedido).orElseThrow(() -> new PedidoNoEncontrado("El ID del pedido no está registrado"));
 
-        Imagen imagen = serviceImagen.obtenerImagenDePedido(pedido, numero);
+        Imagen imagen = serviceImagen.obtenerImagenEntidad(pedido,numero);
 
         serviceImagen.actualizarImagen(imagen,base64);
     }
@@ -62,7 +63,7 @@ public class ControllerImagen {
     public void eliminarImagen(@PathVariable Long idPedido, @PathVariable int numero) {
         Pedidos pedido = servicePedidos.pedidoSegunID(idPedido).orElseThrow(() -> new PedidoNoEncontrado("El ID del pedido no está registrado"));
 
-        Imagen imagen = serviceImagen.obtenerImagenDePedido(pedido, numero);
+        Imagen imagen = serviceImagen.obtenerImagenEntidad(pedido,numero);
 
         serviceImagen.eliminarImagen(imagen);
     }

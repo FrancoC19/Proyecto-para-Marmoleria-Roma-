@@ -70,6 +70,14 @@ public class Imagen {
         this.imagen = imagen;
     }
 
+    public void setIdImagen(Long idImagen) {
+        this.idImagen = idImagen;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

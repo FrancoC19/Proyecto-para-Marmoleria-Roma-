@@ -2,6 +2,7 @@ package Marmoleria.Roma.demo.Service;
 
 import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
 import Marmoleria.Roma.demo.Modelos.Extras.Imagen;
+import Marmoleria.Roma.demo.Modelos.dtos.ImagenDTO;
 import Marmoleria.Roma.demo.Repository.RepositoryImagen;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +76,9 @@ public class ServiceImagen {
         }
     }
 
-    public List<Imagen> obtenerImagenesDePedido(Pedidos pedido){
-        return repositoryImagen.findByPedidoOrderByNumeroDeImagenDelPedidoAsc(pedido);
+    public List<ImagenDTO> obtenerImagenesDePedido(Pedidos pedido){
+        List<Imagen> imagenes=repositoryImagen.findByPedidoOrderByNumeroDeImagenDelPedidoAsc(pedido);
+        return  imagenes.stream().map(this::convertirADTO).toList();
     }
 
     @Transactional
@@ -90,14 +92,44 @@ public class ServiceImagen {
         }
     }
 
-    public Imagen obtenerImagenDePedido(Pedidos pedido, int numero) {
-        return repositoryImagen
+    public ImagenDTO obtenerImagenDePedido(Pedidos pedido, int numero) {
+        Imagen imagen=repositoryImagen
                 .findByPedidoAndNumeroDeImagenDelPedido(pedido, numero)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
                                 "No se encontró la imagen"
                         ));
+
+        return convertirADTO(imagen);
+    }
+
+    public Imagen obtenerImagenEntidad(Pedidos pedido, int numero) {
+        return repositoryImagen
+                .findByPedidoAndNumeroDeImagenDelPedido(pedido, numero)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "No se encontró la imagen"
+                        )
+                );
+    }
+
+    private ImagenDTO convertirADTO(Imagen imagen) {
+
+        ImagenDTO dto = new ImagenDTO();
+
+        dto.setIdImagen(imagen.getIdImagen());
+        dto.setVersion(imagen.getVersion());
+        dto.setNumeroDeImagenDelPedido(
+                imagen.getNumeroDeImagenDelPedido()
+        );
+        dto.setIdPedido(
+                imagen.getPedido().getIdPedido()
+        );
+        dto.setImagen(imagen.getImagen());
+
+        return dto;
     }
 
     private byte[] convertirBase64(String base64) {
