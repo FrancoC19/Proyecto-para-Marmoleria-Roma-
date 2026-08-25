@@ -174,17 +174,27 @@ public class ServicePedidos {
 
     @Transactional
     public void actualizarEstadoPedido(Pedidos pedido) {
-        String estadoActual = pedido.getEstado();
         try {
-            if (estadoActual.equalsIgnoreCase(EstadoPedido.EN_PROCESO.toString())) {
-                pedido.setEstado(EstadoPedido.PENDIENTE_DE_ENTREGA.toString());
-                emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
-            } else if (estadoActual.equalsIgnoreCase(EstadoPedido.PENDIENTE_DE_ENTREGA.toString())) {
-                pedido.setEstado(EstadoPedido.ENTREGADO.toString());
-            }
+            pedido.setEstado(EstadoPedido.PENDIENTE_DE_ENTREGA.toString());
+            emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
 
-                repositoryPedidos.saveAndFlush(pedido);
-                notificacionService.notificacarPorLlamada();
+            repositoryPedidos.saveAndFlush(pedido);
+            notificacionService.notificacarPorLlamada();
+        }catch(OptimisticLockingFailureException e){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "El pedido fue modificado por otro usuario"
+            );
+        }
+    }
+
+    @Transactional
+    public void pedidoEntregado(Pedidos pedido){
+        try {
+            pedido.setEstado(EstadoPedido.ENTREGADO.toString());
+
+            repositoryPedidos.saveAndFlush(pedido);
+            notificacionService.notificacarPorLlamada();
         }catch(OptimisticLockingFailureException e){
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
