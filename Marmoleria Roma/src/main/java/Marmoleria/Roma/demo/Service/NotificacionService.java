@@ -1,5 +1,6 @@
 package Marmoleria.Roma.demo.Service;
 
+import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
 import Marmoleria.Roma.demo.Modelos.Extras.Notificacion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -18,19 +19,23 @@ public class NotificacionService {
     private ServicePedidos servicePedidos;
 
     private final List<Notificacion> notificaciones = new ArrayList<>();
+    private final List<Notificacion> notificacionAdmin = new ArrayList<>();
 
     @Scheduled(cron = "0 0 9,15 * * *")
     public void notificarPedidosProximosProgramado() {
         generarNotificaciones();
+        generarNotificacionAdmin();
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void notificarAlIniciar() {
         generarNotificaciones();
+        generarNotificacionAdmin();
     }
 
     public void notificacarPorLlamada(){
         generarNotificaciones();
+        generarNotificacionAdmin();
     }
 
     private void generarNotificaciones() {
@@ -46,7 +51,23 @@ public class NotificacionService {
         });
     }
 
+    private void generarNotificacionAdmin() {
+        notificacionAdmin.clear();
+
+        servicePedidos.pedidosSegunEstado(EstadoPedido.PENDIENTE_DE_ENTREGA).ifPresent(pedidos -> {
+            pedidos.forEach(p -> {
+                String mensaje = "⚠️ Pedido " + p.getIdPedido() +
+                        " del cliente " + p.getCliente().getNombre() +
+                        " está pendiente de entrega";
+                notificacionAdmin.add(new Notificacion(mensaje));
+            });
+        });
+    }
+
     public List<Notificacion> obtenerNotificaciones() {
         return notificaciones;
+    }
+    public List<Notificacion> obtenerNotificacionesAdmin() {
+        return notificacionAdmin;
     }
 }

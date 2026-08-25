@@ -20,5 +20,10 @@ public class NotificacionController {
         return notificacionService.obtenerNotificaciones();
     }
 
+    @GetMapping("/pedidosAdmin")
+    public List<Notificacion> getNotificacionesAdmin() {
+        return notificacionService.obtenerNotificacionesAdmin();
+    }
+
     //En el front, consultar para ejecutar esta cada cierto tiempo, a las 9 y a las 15
 }
