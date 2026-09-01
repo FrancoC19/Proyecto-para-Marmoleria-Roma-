@@ -12,9 +12,10 @@ public class PedidoDTO {
 
     // IDs de entidades relacionadas
     public Long clienteDni;
-    public Long empleadoDni;
+    public Long empleadoDni; // null al cargar el pedido; se asigna recién al finalizar el proceso
     public Long materialId;
-    public Long piletaId; // null = mesada ciega, sin pileta
+    public Long piletaId; // null = sin pileta de catálogo (ver piletaDeCliente)
+    public Boolean piletaDeCliente; // solo relevante si piletaId es null: true = el cliente trae su propia pileta
 
     // Monto de seña
     public Integer senia;

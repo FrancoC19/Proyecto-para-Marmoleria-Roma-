@@ -35,10 +35,9 @@ public class Pedidos {
     @NotNull(message = "El pedido debe tener un cliente")
     private Cliente cliente;
 
-    // 🔹 NUEVO CAMPO: relación con empleado
+    // Se asigna recién al finalizar el proceso (EN_PROCESO -> PENDIENTE_DE_ENTREGA), no al cargar el pedido.
     @ManyToOne
-    @JoinColumn(name = "id_empleado", nullable = false)
-    @NotNull(message = "El pedido debe tener un empleado asignado")
+    @JoinColumn(name = "id_empleado", nullable = true)
     private Empleado empleado;
 
     @Min(value = 0, message = "La seña no puede ser menor a 0")
@@ -53,6 +52,10 @@ public class Pedidos {
     @ManyToOne
     @JoinColumn(name = "id_pileta", nullable = true)
     private Piletas pileta;
+
+    // Solo tiene sentido cuando pileta es null: true = el cliente trae su propia pileta,
+    // false = no hay pileta en el pedido (mesada ciega).
+    private boolean piletaDeCliente = false;
 
     @NotBlank(message = "El pedido debe tener una grifería")
     private String griferia;
@@ -163,6 +166,14 @@ public class Pedidos {
         this.pileta = pileta;
     }
 
+    public boolean isPiletaDeCliente() {
+        return piletaDeCliente;
+    }
+
+    public void setPiletaDeCliente(boolean piletaDeCliente) {
+        this.piletaDeCliente = piletaDeCliente;
+    }
+
     public String getGriferia() {
         return griferia;
     }
@@ -231,11 +242,11 @@ public class Pedidos {
         this.itemsAdicionales = itemsAdicionales;
     }
 
-    public @NotNull(message = "El pedido debe tener un empleado asignado") Empleado getEmpleado() {
+    public Empleado getEmpleado() {
         return empleado;
     }
 
-    public void setEmpleado(@NotNull(message = "El pedido debe tener un empleado asignado") Empleado empleado) {
+    public void setEmpleado(Empleado empleado) {
         this.empleado = empleado;
     }
 

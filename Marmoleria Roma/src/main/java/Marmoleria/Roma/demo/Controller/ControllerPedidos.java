@@ -55,10 +55,10 @@ public class ControllerPedidos {
         Cliente cliente = serviceCliente.buscarClientePorDNI(dto.clienteDni);
         if (cliente == null) return ResponseEntity.badRequest().body("Cliente no encontrado");
 
-        Empleado empleado = serviceEmpleado.buscarEmpleadoPorDNI(dto.empleadoDni);
-        if (empleado == null) return ResponseEntity.badRequest().body("Empleado no encontrado");
+        // Empleado NO se asigna al cargar el pedido: se asigna recién al finalizar el proceso.
+        Empleado empleado = null;
 
-        // Pileta opcional (mesada ciega si no viene ID)
+        // Pileta opcional (mesada ciega o pileta de cliente si no viene ID)
         Piletas pileta = null;
         if (dto.piletaId != null) {
             pileta = servicePiletas.buscarPorId(dto.piletaId);
@@ -77,6 +77,7 @@ public class ControllerPedidos {
         Pedidos pedido = new Pedidos(cliente, empleado, dto.descuento, dto.fechaEmision, dto.fechaEntrega,
                 dto.griferia, material, dto.metrosCuadrados, dto.moldura, dto.observaciones,
                 pileta, dto.senia, dto.direccion);
+        pedido.setPiletaDeCliente(pileta == null && Boolean.TRUE.equals(dto.piletaDeCliente));
 
         // Armar los ítems adicionales (mano de obra) elegidos para este pedido
         if (dto.itemsAdicionales != null) {
@@ -230,9 +231,6 @@ public class ControllerPedidos {
                     Cliente cliente = serviceCliente.buscarClientePorDNI(dto.clienteDni);
                     if (cliente == null) return ResponseEntity.badRequest().body("Cliente no encontrado");
 
-                    Empleado empleado = serviceEmpleado.buscarEmpleadoPorDNI(dto.empleadoDni);
-                    if (empleado == null) return ResponseEntity.badRequest().body("Empleado no encontrado");
-
                     Materiales material = serviceMateriales.buscarPorId(dto.materialId);
                     if (material == null) return ResponseEntity.badRequest().body("Material no encontrado");
 
@@ -266,9 +264,9 @@ public class ControllerPedidos {
                     }
 
                     p.setCliente(cliente);
-                    p.setEmpleado(empleado);
                     p.setMaterial(material);
-                    p.setPileta(piletaNueva); // null si es mesada ciega
+                    p.setPileta(piletaNueva); // null si es mesada ciega o pileta de cliente
+                    p.setPiletaDeCliente(piletaNueva == null && Boolean.TRUE.equals(dto.piletaDeCliente));
 
                     servicePedidos.actualizarPedidos(p);
 
@@ -334,13 +332,23 @@ public class ControllerPedidos {
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @PutMapping("/FinalizarProceso/{id}")
-    public ResponseEntity<Map<String, String>> finalizarProcesoPedido(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> finalizarProcesoPedido(@PathVariable Long id, @RequestBody Map<String, Long> body) {
+
+        Long empleadoDni = body.get("empleadoDni");
+        if (empleadoDni == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar el empleado que finaliza el proceso");
+        }
+        Empleado empleado = serviceEmpleado.buscarEmpleadoPorDNI(empleadoDni);
+        if (empleado == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Empleado no encontrado");
+        }
 
         Pedidos pedido = servicePedidos.pedidoSegunID(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "No existe ese pedido"
                 ));
 
+        pedido.setEmpleado(empleado);
         servicePedidos.actualizarEstadoPedido(pedido);
 
         Map<String, String> resp = new HashMap<>();

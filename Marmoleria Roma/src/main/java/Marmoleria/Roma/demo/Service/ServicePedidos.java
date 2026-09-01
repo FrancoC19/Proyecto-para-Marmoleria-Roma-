@@ -179,15 +179,14 @@ public class ServicePedidos {
         }
         pedido.setCliente(clientePersistido);
 
-        // Validar y buscar Empleado
-        if (pedido.getEmpleado() == null || pedido.getEmpleado().getDNI() == null) {
-            throw new IllegalArgumentException("El ID del empleado es obligatorio");
+        // Empleado: opcional al cargar el pedido, se asigna recién al finalizar el proceso
+        if (pedido.getEmpleado() != null && pedido.getEmpleado().getDNI() != null) {
+            Empleado empleadoPersistido = entityManager.find(Empleado.class, pedido.getEmpleado().getDNI());
+            if (empleadoPersistido == null) {
+                throw new IllegalArgumentException("Empleado no encontrado con ID: " + pedido.getEmpleado().getDNI());
+            }
+            pedido.setEmpleado(empleadoPersistido);
         }
-        Empleado empleadoPersistido = entityManager.find(Empleado.class, pedido.getEmpleado().getDNI());
-        if (empleadoPersistido == null) {
-            throw new IllegalArgumentException("Empleado no encontrado con ID: " + pedido.getEmpleado().getDNI());
-        }
-        pedido.setEmpleado(empleadoPersistido);
 
         // Validar y buscar Material
         if (pedido.getMaterial() == null || pedido.getMaterial().getId() == null) {
