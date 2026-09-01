@@ -1,6 +1,8 @@
 package Marmoleria.Roma.demo.Modelos.Elementos;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.TipoMaterial;
+import Marmoleria.Roma.demo.Modelos.Extras.GrupoPrecio;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
@@ -10,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Materiales {
 
     @Id
@@ -24,12 +27,17 @@ public class Materiales {
     @NotBlank(message = "El material debe poseer un nombre...")
     private String nombreMaterial;
 
-    @DecimalMin(value = "0.1", message = "El precio no puede ser cero o negativo")
-    private Float valorMetroCuadrado;
-
     @NotNull(message = "El material debe poseer un tipo...")
     @Enumerated(EnumType.STRING)
     private TipoMaterial tipoMaterial;
+
+    @NotNull(message = "El material debe poseer un grupo de precio...")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "grupo_precio_id")
+    private GrupoPrecio grupoPrecio;
+
+    @DecimalMin(value = "0.0", inclusive = false, message = "El precio individual debe ser mayor a cero")
+    private Float precioPorM2Individual;
 
     @OneToMany(mappedBy = "material", cascade = CascadeType.REMOVE)
     @JsonIgnore
@@ -37,40 +45,37 @@ public class Materiales {
 
     public Materiales() {}
 
-    public Materiales(String nombreMaterial, TipoMaterial tipoMaterial, Float valorMetroCuadrado) {
+    public Materiales(String nombreMaterial, TipoMaterial tipoMaterial, GrupoPrecio grupoPrecio) {
         this.nombreMaterial = nombreMaterial;
         this.tipoMaterial = tipoMaterial;
-        this.valorMetroCuadrado = valorMetroCuadrado;
+        this.grupoPrecio = grupoPrecio;
     }
 
-    public Long getId() {
-        return id_materiales;
-    }
-    public  void setId(long id_materiales) {
-        this.id_materiales = id_materiales;
+    public Long getId() { return id_materiales; }
+    public void setId(long id_materiales) { this.id_materiales = id_materiales; }
+
+    public String getNombreMaterial() { return nombreMaterial; }
+    public void setNombreMaterial(String nombreMaterial) { this.nombreMaterial = nombreMaterial; }
+
+    public TipoMaterial getTipoMaterial() { return tipoMaterial; }
+    public void setTipoMaterial(TipoMaterial tipoMaterial) { this.tipoMaterial = tipoMaterial; }
+
+    public GrupoPrecio getGrupoPrecio() { return grupoPrecio; }
+    public void setGrupoPrecio(GrupoPrecio grupoPrecio) { this.grupoPrecio = grupoPrecio; }
+
+    public Float getPrecioPorM2Individual() {
+        return precioPorM2Individual;
     }
 
-    public String getNombreMaterial() {
-        return nombreMaterial;
+    public void setPrecioPorM2Individual(Float precioPorM2Individual) {
+        this.precioPorM2Individual = precioPorM2Individual;
     }
 
-    public void setNombreMaterial(String nombreMaterial) {
-        this.nombreMaterial = nombreMaterial;
-    }
-
+    // Se mantiene por compatibilidad con el resto del sistema (PDF, pedidos, etc.)
     public Float getValorMetroCuadrado() {
-        return valorMetroCuadrado;
-    }
-
-    public void setValorMetroCuadrado(Float valorMetroCuadrado) {
-        this.valorMetroCuadrado = valorMetroCuadrado;
-    }
-
-    public TipoMaterial getTipoMaterial() {
-        return tipoMaterial;
-    }
-
-    public void setTipoMaterial(TipoMaterial tipoMaterial) {
-        this.tipoMaterial = tipoMaterial;
+        if (grupoPrecio == null) return null;
+        return grupoPrecio.isPrecioCompartido()
+                ? grupoPrecio.getPrecioPorM2()
+                : this.precioPorM2Individual;
     }
 }

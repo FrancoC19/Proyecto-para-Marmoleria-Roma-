@@ -1,8 +1,10 @@
 package Marmoleria.Roma.demo.Modelos.Elementos;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
 import Marmoleria.Roma.demo.Modelos.Extras.Direccion;
+import Marmoleria.Roma.demo.Modelos.Extras.PedidoItemAdicional;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -10,9 +12,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Pedidos {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_pedido")
@@ -46,7 +51,7 @@ public class Pedidos {
     private Materiales material;
 
     @ManyToOne
-    @JoinColumn(name = "id_pileta", nullable = false)
+    @JoinColumn(name = "id_pileta", nullable = true)
     private Piletas pileta;
 
     @NotBlank(message = "El pedido debe tener una grifería")
@@ -62,6 +67,10 @@ public class Pedidos {
 
     @NotNull(message = "Debe especificarse el total de metros cuadrados")
     private Float metrosCuadrados;
+
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("pedido")
+    private List<PedidoItemAdicional> itemsAdicionales = new ArrayList<>();
 
     @Embedded
     private Direccion direccion;
@@ -101,7 +110,7 @@ public class Pedidos {
         this.senia = senia;
         this.direccion = direccion;
         this.empleado = empleado;
-        calcularValor();
+
     }
 
     // --- Getters y Setters ---
@@ -214,6 +223,14 @@ public class Pedidos {
         this.estado = estado;
     }
 
+    public List<PedidoItemAdicional> getItemsAdicionales() {
+        return itemsAdicionales;
+    }
+
+    public void setItemsAdicionales(List<PedidoItemAdicional> itemsAdicionales) {
+        this.itemsAdicionales = itemsAdicionales;
+    }
+
     public @NotNull(message = "El pedido debe tener un empleado asignado") Empleado getEmpleado() {
         return empleado;
     }
@@ -222,18 +239,7 @@ public class Pedidos {
         this.empleado = empleado;
     }
 
-    /**
-     * Calcula el valor total del pedido según:
-     * (metros * valor del material) + valor pileta - descuento (si aplica)
-     */
-    public void calcularValor() {
-        float resultado = (this.metrosCuadrados * this.material.getValorMetroCuadrado())
-                + this.pileta.getValor();
-
-        if (this.descuento != null && this.descuento > 0) {
-            resultado -= resultado * this.descuento;
-        }
-
-       this.valorTotal=resultado;
+    public void setValorTotalCalculado(Float valorTotal) {
+        this.valorTotal = valorTotal;
     }
 }

@@ -3,6 +3,8 @@ package Marmoleria.Roma.demo.Controller;
 import Marmoleria.Roma.demo.Excepciones.MaterialNoEncontrado;
 import Marmoleria.Roma.demo.Modelos.Elementos.Materiales;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.TipoMaterial;
+import Marmoleria.Roma.demo.Modelos.Extras.GrupoPrecio;
+import Marmoleria.Roma.demo.Service.ServiceGrupoPrecio;
 import Marmoleria.Roma.demo.Service.ServiceMateriales;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +26,41 @@ public class ControllerMateriales {
 
     @Autowired
     ServiceMateriales serviceMateriales;
+    @Autowired
+    ServiceGrupoPrecio serviceGrupoPrecio;
 
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @PostMapping("/Guardar")
-    public ResponseEntity<Map<String, String>> guardarMateriales(@RequestBody @Valid Materiales material) {
-        Materiales Existente= serviceMateriales.buscarPorId(material.getId());
-        if(Existente!=null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Ya existe este material");
+    public ResponseEntity<Map<String, String>> guardarMateriales(@RequestBody Map<String, Object> datos) {
+        String nombreMaterial = (String) datos.get("nombreMaterial");
+        TipoMaterial tipo = TipoMaterial.valueOf((String) datos.get("tipoMaterial"));
+        long grupoId = Long.parseLong(datos.get("grupoPrecioId").toString());
+
+        GrupoPrecio grupo = serviceGrupoPrecio.buscarPorId(grupoId);
+        if (grupo == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Grupo de precio inválido");
         }
+
+        Materiales material = new Materiales(nombreMaterial, tipo, grupo);
+
+        // Si el grupo NO es de precio compartido, el material necesita su propio precio
+        if (!grupo.isPrecioCompartido()) {
+            Object precioObj = datos.get("precioPorM2Individual");
+            if (precioObj == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Este tipo de material requiere un precio individual");
+            }
+            float precioIndividual = Float.parseFloat(precioObj.toString());
+            if (precioIndividual <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "El precio individual debe ser mayor a cero");
+            }
+            material.setPrecioPorM2Individual(precioIndividual);
+        }
+
         serviceMateriales.guardarMaterial(material);
+
         Map<String, String> response = new HashMap<>();
         response.put("mensaje", "Material guardado correctamente");
         return ResponseEntity.ok(response);
@@ -69,16 +96,40 @@ public class ControllerMateriales {
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @PutMapping("/Modificar/{id_Material}")
-    public ResponseEntity<Materiales> modificarMaterial(@RequestBody @Valid Materiales datosActualizados, @PathVariable int id_Material) {
+    public ResponseEntity<Materiales> modificarMaterial(@RequestBody Map<String, Object> datos, @PathVariable int id_Material) {
         return Optional.ofNullable(serviceMateriales.buscarPorId(id_Material))
-                .map(material->{
-                    material.setNombreMaterial(datosActualizados.getNombreMaterial());
-                    material.setTipoMaterial(datosActualizados.getTipoMaterial());
-                    material.setValorMetroCuadrado(datosActualizados.getValorMetroCuadrado());
+                .map(material -> {
+                    material.setNombreMaterial((String) datos.get("nombreMaterial"));
+                    material.setTipoMaterial(TipoMaterial.valueOf((String) datos.get("tipoMaterial")));
+
+                    long grupoId = Long.parseLong(datos.get("grupoPrecioId").toString());
+                    GrupoPrecio grupo = serviceGrupoPrecio.buscarPorId(grupoId);
+                    if (grupo == null) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Grupo de precio inválido");
+                    }
+                    material.setGrupoPrecio(grupo);
+
+                    // Si el grupo NO es de precio compartido, actualizamos el precio individual
+                    if (!grupo.isPrecioCompartido()) {
+                        Object precioObj = datos.get("precioPorM2Individual");
+                        if (precioObj == null) {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                    "Este tipo de material requiere un precio individual");
+                        }
+                        float precioIndividual = Float.parseFloat(precioObj.toString());
+                        if (precioIndividual <= 0) {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                    "El precio individual debe ser mayor a cero");
+                        }
+                        material.setPrecioPorM2Individual(precioIndividual);
+                    } else {
+                        // Si pasó a un grupo compartido, limpiamos el precio individual viejo (ya no aplica)
+                        material.setPrecioPorM2Individual(null);
+                    }
+
                     serviceMateriales.actualizarMaterial(material);
                     return ResponseEntity.ok(material);
-                }).orElseGet(()->ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-
+                }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
     @GetMapping("/Tipo/{TipoMaterial}")

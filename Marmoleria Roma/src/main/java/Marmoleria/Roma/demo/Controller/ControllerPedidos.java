@@ -5,8 +5,12 @@ import Marmoleria.Roma.demo.Modelos.Elementos.Materiales;
 import Marmoleria.Roma.demo.Modelos.Elementos.Pedidos;
 import Marmoleria.Roma.demo.Modelos.Elementos.Piletas;
 import Marmoleria.Roma.demo.Modelos.Enumeradores.EstadoPedido;
+import Marmoleria.Roma.demo.Modelos.Extras.ItemAdicional;
+import Marmoleria.Roma.demo.Modelos.Extras.PedidoItemAdicional;
 import Marmoleria.Roma.demo.Modelos.Personas.Cliente;
 import Marmoleria.Roma.demo.Modelos.Personas.Empleado;
+import Marmoleria.Roma.demo.Modelos.dtos.CotizacionDTO;
+import Marmoleria.Roma.demo.Modelos.dtos.CotizacionResultadoDTO;
 import Marmoleria.Roma.demo.Modelos.dtos.PedidoDTO;
 import Marmoleria.Roma.demo.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,34 +45,108 @@ public class ControllerPedidos {
     private ServiceMateriales serviceMateriales;
     @Autowired
     private ServicePiletas servicePiletas;
+    @Autowired
+    private ServiceItemAdicional serviceItemAdicional;
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @PostMapping("/Guardar")
     public ResponseEntity<String> guardarPedido(@RequestBody PedidoDTO dto) {
 
-        Cliente cliente=serviceCliente.buscarClientePorDNI(dto.clienteDni);
+        Cliente cliente = serviceCliente.buscarClientePorDNI(dto.clienteDni);
         if (cliente == null) return ResponseEntity.badRequest().body("Cliente no encontrado");
 
-        Empleado empleado=serviceEmpleado.buscarEmpleadoPorDNI(dto.empleadoDni);
+        Empleado empleado = serviceEmpleado.buscarEmpleadoPorDNI(dto.empleadoDni);
         if (empleado == null) return ResponseEntity.badRequest().body("Empleado no encontrado");
 
-        Piletas pileta=servicePiletas.buscarPorId(dto.piletaId);
-        if (pileta == null) return ResponseEntity.badRequest().body("Pileta no encontrado");
+        // Pileta opcional (mesada ciega si no viene ID)
+        Piletas pileta = null;
+        if (dto.piletaId != null) {
+            pileta = servicePiletas.buscarPorId(dto.piletaId);
+            if (pileta == null) return ResponseEntity.badRequest().body("Pileta no encontrada");
 
-        int nuevoStock = pileta.getCantidad() - 1;
-        if (nuevoStock < 0) return ResponseEntity.badRequest().body("Stock insuficiente para la pileta seleccionada");
+            int nuevoStock = pileta.getCantidad() - 1;
+            if (nuevoStock < 0) return ResponseEntity.badRequest().body("Stock insuficiente para la pileta seleccionada");
 
-        pileta.setCantidad(nuevoStock);
-        servicePiletas.modificarPileta(pileta);
+            pileta.setCantidad(nuevoStock);
+            servicePiletas.modificarPileta(pileta);
+        }
 
-        Materiales material=serviceMateriales.buscarPorId(dto.materialId);
+        Materiales material = serviceMateriales.buscarPorId(dto.materialId);
         if (material == null) return ResponseEntity.badRequest().body("Material no encontrado");
 
-        Pedidos pedido = new Pedidos(cliente,empleado, dto.descuento, dto.fechaEmision, dto.fechaEntrega, dto.griferia, material, dto.metrosCuadrados, dto.moldura, dto.observaciones, pileta, dto.senia, dto.direccion);
-        // Guardamos el pedido
-        pedido.calcularValor();
+        Pedidos pedido = new Pedidos(cliente, empleado, dto.descuento, dto.fechaEmision, dto.fechaEntrega,
+                dto.griferia, material, dto.metrosCuadrados, dto.moldura, dto.observaciones,
+                pileta, dto.senia, dto.direccion);
+
+        // Armar los ítems adicionales (mano de obra) elegidos para este pedido
+        if (dto.itemsAdicionales != null) {
+            List<PedidoItemAdicional> items = new ArrayList<>();
+            for (PedidoDTO.ItemAdicionalDTO itemDto : dto.itemsAdicionales) {
+                PedidoItemAdicional pia;
+                if (itemDto.itemAdicionalId != null) {
+                    ItemAdicional itemCatalogo = serviceItemAdicional.buscarPorId(itemDto.itemAdicionalId);
+                    if (itemCatalogo == null) {
+                        return ResponseEntity.badRequest().body("Ítem adicional no encontrado: " + itemDto.itemAdicionalId);
+                    }
+                    pia = new PedidoItemAdicional(pedido, itemCatalogo, itemDto.cantidad);
+                } else {
+                    if (itemDto.precioManual == null || itemDto.precioManual < 0) {
+                        return ResponseEntity.badRequest().body("El precio manual no puede ser negativo");
+                    }
+                    pia = new PedidoItemAdicional(pedido, itemDto.descripcionManual, itemDto.precioManual, itemDto.monedaManual);
+                }
+                items.add(pia);
+            }
+            pedido.setItemsAdicionales(items);
+        }
+
         servicePedidos.guardarPedidos(pedido);
         return ResponseEntity.ok("Pedido guardado correctamente y stock actualizado.");
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
+    @PostMapping("/Cotizar")
+    public ResponseEntity<CotizacionResultadoDTO> cotizarPedido(@RequestBody CotizacionDTO dto) {
+        if (dto.materialId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID del material es obligatorio");
+        }
+        Materiales material = serviceMateriales.buscarPorId(dto.materialId);
+        if (material == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Material no encontrado");
+        }
+
+        Piletas pileta = null;
+        if (dto.piletaId != null) {
+            pileta = servicePiletas.buscarPorId(dto.piletaId);
+            if (pileta == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pileta no encontrada");
+            }
+        }
+
+        List<PedidoItemAdicional> items = new ArrayList<>();
+        if (dto.itemsAdicionales != null) {
+            for (PedidoDTO.ItemAdicionalDTO itemDto : dto.itemsAdicionales) {
+                PedidoItemAdicional pia;
+                if (itemDto.itemAdicionalId != null) {
+                    ItemAdicional itemCatalogo = serviceItemAdicional.buscarPorId(itemDto.itemAdicionalId);
+                    if (itemCatalogo == null) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Ítem adicional no encontrado: " + itemDto.itemAdicionalId);
+                    }
+                    pia = new PedidoItemAdicional(null, itemCatalogo, itemDto.cantidad);
+                } else {
+                    if (itemDto.precioManual == null || itemDto.precioManual < 0) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "El precio manual no puede ser negativo");
+                    }
+                    pia = new PedidoItemAdicional(null, itemDto.descripcionManual, itemDto.precioManual, itemDto.monedaManual);
+                }
+                items.add(pia);
+            }
+        }
+
+        CotizacionResultadoDTO resultado = servicePedidos.calcularCotizacion(material, pileta, dto.metrosCuadrados, items);
+        return ResponseEntity.ok(resultado);
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
@@ -132,7 +211,7 @@ public class ControllerPedidos {
     public ResponseEntity<String> actualizarPedido(@PathVariable long id, @RequestBody PedidoDTO dto) {
         return servicePedidos.pedidoSegunID(id)
                 .map(p -> {
-                    // 🔹 Campos básicos
+                    // Campos básicos
                     p.setObservaciones(dto.observaciones);
                     p.setSenia(dto.senia);
                     p.setGriferia(dto.griferia);
@@ -150,23 +229,40 @@ public class ControllerPedidos {
                     Materiales material = serviceMateriales.buscarPorId(dto.materialId);
                     if (material == null) return ResponseEntity.badRequest().body("Material no encontrado");
 
-                    Piletas pileta = servicePiletas.buscarPorId(dto.piletaId);
-                    if (pileta == null) return ResponseEntity.badRequest().body("Pileta no encontrada");
+                    // --- Manejo de stock de pileta, contemplando que puede ser opcional ---
+                    Piletas piletaVieja = p.getPileta(); // puede ser null (mesada ciega previa)
+                    Piletas piletaNueva = null;
 
-                    Piletas piletaAReingresar= servicePiletas.buscarPorId(p.getPileta().getId());
-                    piletaAReingresar.setCantidad(piletaAReingresar.getCantidad()+1);
-                    servicePiletas.modificarPileta(piletaAReingresar);
+                    if (dto.piletaId != null) {
+                        piletaNueva = servicePiletas.buscarPorId(dto.piletaId);
+                        if (piletaNueva == null) return ResponseEntity.badRequest().body("Pileta no encontrada");
+                    }
 
-                    Piletas piletaArestar= servicePiletas.buscarPorId(dto.piletaId);
-                    piletaArestar.setCantidad(piletaArestar.getCantidad()-1);
-                    servicePiletas.modificarPileta(piletaArestar);
+                    boolean cambioDePileta = (piletaVieja == null && piletaNueva != null)
+                            || (piletaVieja != null && piletaNueva == null)
+                            || (piletaVieja != null && piletaNueva != null && !piletaVieja.getId().equals(piletaNueva.getId()));
+
+                    if (cambioDePileta) {
+                        // Devolvemos stock de la pileta anterior, si había una
+                        if (piletaVieja != null) {
+                            Piletas piletaAReingresar = servicePiletas.buscarPorId(piletaVieja.getId());
+                            piletaAReingresar.setCantidad(piletaAReingresar.getCantidad() + 1);
+                            servicePiletas.modificarPileta(piletaAReingresar);
+                        }
+                        // Restamos stock de la pileta nueva, si corresponde
+                        if (piletaNueva != null) {
+                            int nuevoStock = piletaNueva.getCantidad() - 1;
+                            if (nuevoStock < 0) return ResponseEntity.badRequest().body("Stock insuficiente para la pileta seleccionada");
+                            piletaNueva.setCantidad(nuevoStock);
+                            servicePiletas.modificarPileta(piletaNueva);
+                        }
+                    }
 
                     p.setCliente(cliente);
                     p.setEmpleado(empleado);
                     p.setMaterial(material);
-                    p.setPileta(pileta);
+                    p.setPileta(piletaNueva); // null si es mesada ciega
 
-                    p.calcularValor();
                     servicePedidos.actualizarPedidos(p);
 
                     return ResponseEntity.ok("Pedido actualizado correctamente.");
