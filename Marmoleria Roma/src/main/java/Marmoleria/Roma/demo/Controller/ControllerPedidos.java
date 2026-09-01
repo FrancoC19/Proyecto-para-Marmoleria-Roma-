@@ -152,7 +152,14 @@ public class ControllerPedidos {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/PendientesAterminar")
     public ResponseEntity<List<Pedidos>> obtenerPedidosaTerminar() {
-        List<Pedidos> pedidos = servicePedidos.PedidosPendienteYEnProceso().orElse(List.of());
+        List<Pedidos> pedidos = servicePedidos.pedidosSegunEstado(EstadoPedido.EN_PROCESO).orElse(List.of());
+        return ResponseEntity.ok(pedidos);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
+    @GetMapping("/EnProceso")
+    public ResponseEntity<List<Pedidos>> obtenerPedidosEnProceso() {
+        List<Pedidos> pedidos = servicePedidos.pedidosSegunEstado(EstadoPedido.PENDIENTE_DE_ENTREGA).orElse(List.of());
         return ResponseEntity.ok(pedidos);
     }
 
@@ -326,8 +333,8 @@ public class ControllerPedidos {
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMINISTRADOR')")
-    @PutMapping("/Finalizar/{id}")
-    public ResponseEntity<Map<String, String>> finalizarPedido(@PathVariable Long id) {
+    @PutMapping("/FinalizarProceso/{id}")
+    public ResponseEntity<Map<String, String>> finalizarProcesoPedido(@PathVariable Long id) {
 
         Pedidos pedido = servicePedidos.pedidoSegunID(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -335,6 +342,23 @@ public class ControllerPedidos {
                 ));
 
         servicePedidos.actualizarEstadoPedido(pedido);
+
+        Map<String, String> resp = new HashMap<>();
+        resp.put("mensaje", "Pedido finalizado correctamente");
+
+        return ResponseEntity.ok(resp);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
+    @PutMapping("/EntregarPedido/{id}")
+    public ResponseEntity<Map<String, String>> finalizarPedido(@PathVariable Long id) {
+
+        Pedidos pedido = servicePedidos.pedidoSegunID(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No existe ese pedido"
+                ));
+
+        servicePedidos.pedidoEntregado(pedido);
 
         Map<String, String> resp = new HashMap<>();
         resp.put("mensaje", "Pedido finalizado correctamente");
