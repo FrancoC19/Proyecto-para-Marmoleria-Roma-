@@ -313,7 +313,14 @@ public class ServicePedidos {
     public void actualizarEstadoPedido(Pedidos pedido) {
         try {
             pedido.setEstado(EstadoPedido.PENDIENTE_DE_ENTREGA.toString());
-            emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
+
+            // El aviso por mail es best-effort: si falla (credenciales, SMTP caído, etc.)
+            // no debe impedir que el pedido pase de estado.
+            try {
+                emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
+            } catch (Exception e) {
+                System.err.println("No se pudo enviar el mail de aviso de pedido terminado: " + e.getMessage());
+            }
 
             repositoryPedidos.saveAndFlush(pedido);
             notificacionService.notificacarPorLlamada();
