@@ -314,13 +314,9 @@ public class ServicePedidos {
         try {
             pedido.setEstado(EstadoPedido.PENDIENTE_DE_ENTREGA.toString());
 
-            // El aviso por mail es best-effort: si falla (credenciales, SMTP caído, etc.)
-            // no debe impedir que el pedido pase de estado.
-            try {
-                emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
-            } catch (Exception e) {
-                System.err.println("No se pudo enviar el mail de aviso de pedido terminado: " + e.getMessage());
-            }
+            // Aviso por mail deshabilitado: la cuenta de Gmail configurada no está autenticando
+            // (534-5.7.9 WebLoginRequired). Reactivar cuando se resuelva la credencial.
+            // emailService.enviarCorreoSimple(pedido.getCliente().getCorreo(),"Pedido terminado","Por la presente, le notificamos a: "+pedido.getCliente().getNombre()+", de correo: "+pedido.getCliente().getCorreo()+" y telefono: "+pedido.getCliente().getTelefono()+" que su pedido esta preparado para la entrega, coordinar por whatsapp con la secretaria \n\nAtentamente,\nMarmoleria Roma");
 
             repositoryPedidos.saveAndFlush(pedido);
             notificacionService.notificacarPorLlamada();
