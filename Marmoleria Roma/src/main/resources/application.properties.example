@@ -1,9 +1,11 @@
 spring.application.name=Marmoleria
 
 # --- CONFIGURACIÓN DE BASE DE DATOS ---
+# Copiá este archivo como application.properties (sin .example) y completá
+# tus propios valores locales. application.properties no se versiona.
 spring.datasource.url=jdbc:mysql://localhost:3306/marmoleriaroma?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=America/Argentina/Buenos_Aires
 spring.datasource.username=root
-spring.datasource.password=2486513790
+spring.datasource.password=tu_password_de_mysql_local
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 # --- CONFIGURACIÓN DE JPA / HIBERNATE ---
@@ -17,10 +19,10 @@ spring.sql.init.mode=always
 # --- CONFIGURACIÓN DE CORREO ---
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=pruebademail47@gmail.com
-spring.mail.password=slefbfclbpnspxyd
+spring.mail.username=tu_correo@gmail.com
+spring.mail.password=tu_contraseña_de_aplicacion_de_gmail
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
 # --- JWT ---
-jwt.secret=EstaclaveEsBaStantelarGaYnomeLAacurdonienpedo59487*/estaclaveesunamuyseria/nodeveria_ver_esto_volve_o_moriras
+jwt.secret=poné_aca_una_clave_larga_y_secreta_propia
