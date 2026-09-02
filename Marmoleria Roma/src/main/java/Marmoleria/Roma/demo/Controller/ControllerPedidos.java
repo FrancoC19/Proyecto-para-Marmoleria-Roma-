@@ -157,7 +157,7 @@ public class ControllerPedidos {
         return ResponseEntity.ok(pedidos);
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','USUARIO')")
     @GetMapping("/EnProceso")
     public ResponseEntity<List<Pedidos>> obtenerPedidosEnProceso() {
         List<Pedidos> pedidos = servicePedidos.pedidosSegunEstado(EstadoPedido.PENDIENTE_DE_ENTREGA).orElse(List.of());
